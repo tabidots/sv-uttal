@@ -37,6 +37,64 @@ export default defineConfig({
 			customCss: [
 				'./src/styles/custom.css',
 			],
+			head: [
+				// Basic Open Graph tags
+				{
+					tag: 'meta',
+					attrs: { property: 'og:title', content: 'Swedish pronunciation notes • Anteckningar om svensk uttal' },
+				},
+				{
+					tag: 'meta',
+					attrs: {
+						property: 'og:description', content: 'A reasonably complete guide for learners of Swedish covering the consonants that don\'t follow the rules, plus general tendencies regarding pitch accent.' },
+				},
+				{
+					tag: 'meta',
+					attrs: { property: 'og:image', content: 'https://tabidots.github.io/sv-uttal/_astro/hero.D9qXNQyy_Z1HYzg2.svg' },
+				},
+				{
+					tag: 'meta',
+					attrs: { property: 'og:image:alt', content: 'Blue and yellow gradient lips representing Swedish pronunciation' },
+				},
+				{
+					tag: 'meta',
+					attrs: { property: 'og:image:width', content: '1200' },
+				},
+				{
+					tag: 'meta',
+					attrs: { property: 'og:image:height', content: '1200' },
+				},
+				{
+					tag: 'meta',
+					attrs: { property: 'og:type', content: 'website' },
+				},
+				{
+					tag: 'meta',
+					attrs: { property: 'og:url', content: 'https://tabidots.github.io/sv-uttal/' },
+				},
+
+				// Twitter/X cards
+				{
+					tag: 'meta',
+					attrs: { name: 'twitter:card', content: 'summary_large_image' },
+				},
+				{
+					tag: 'meta',
+					attrs: { name: 'twitter:title', content: 'Swedish pronunciation notes • Anteckningar om svensk uttal' },
+				},
+				{
+					tag: 'meta',
+					attrs: { name: 'twitter:description', content: 'A reasonably complete guide for learners of Swedish covering the consonants that don\'t follow the rules, plus general tendencies regarding pitch accent.' },
+				},
+				{
+					tag: 'meta',
+					attrs: { name: 'twitter:image', content: 'https://tabidots.github.io/sv-uttal/_astro/hero.D9qXNQyy_Z1HYzg2.svg' },
+				},
+				{
+					tag: 'meta',
+					attrs: { name: 'twitter:image:alt', content: 'Blue and yellow gradient lips representing Swedish pronunciation' },
+				},
+			],
 		}),
 	],
 });
