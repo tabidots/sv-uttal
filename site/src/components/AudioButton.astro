@@ -5,6 +5,7 @@ interface Props {
   lang?: string;
 }
 const { word, lang = "sv-SE" } = Astro.props;
+import speakerIcon from "../assets/1f50a.svg";
 ---
 
 <button
@@ -15,7 +16,7 @@ const { word, lang = "sv-SE" } = Astro.props;
 >
   <img
     class="icon-playing"
-    src="/icons/1f50a.svg"
+    src={speakerIcon.src}
     alt=""
     width="20"
     height="20"
