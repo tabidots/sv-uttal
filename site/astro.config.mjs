@@ -16,19 +16,19 @@ export default defineConfig({
 				{
 					label: 'Surprise consonants',
 					items: [
-						{ label: 'Introduction', slug: 'irregular' },
-						{ label: '-ion and eu-', slug: 'irregular/ion-eu' },
-						{ label: 'sc, sch, and ch', slug: 'irregular/sc-sch-ch' },
-						{ label: 'k and sk', slug: 'irregular/k-sk' },
-						{ label: 'g and j', slug: 'irregular/g-j' },
+						{ label: 'Introduction', link: '/irregular/' },
+						{ label: '-ion and eu-', link: '/irregular/ion-eu/' },
+						{ label: 'sc, sch, and ch', link: '/irregular/sc-sch-ch/' },
+						{ label: 'k and sk', link: '/irregular/k-sk/' },
+						{ label: 'g and j', link: '/irregular/g-j/' },
 					],
 				},
 				{
 					label: 'Pitch Accent',
 					items: [
-						{ label: 'Introduction', slug: 'accent' },
+						{ label: 'Introduction', link: '/accent/' },
 					],
-				},
+				  },
 			],
 			customCss: [
 				'./src/styles/custom.css',
