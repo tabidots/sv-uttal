@@ -8,6 +8,10 @@ const isProd = process.env.NODE_ENV === 'production';
 export default defineConfig({
 	site: 'https://tabidots.github.io',
 	base: isProd ? '/sv-uttal' : '/', 
+	trailingSlash: 'always',  // GitHub Pages prefers trailing slashes
+	build: {
+		format: 'directory',    // Creates /irregular/index.html instead of /irregular.html
+	},
 	integrations: [
 		starlight({
 			title: 'Swedish pronunciation notes • Anteckningar om svensk uttal',
@@ -16,19 +20,19 @@ export default defineConfig({
 				{
 					label: 'Surprise consonants',
 					items: [
-						{ label: 'Introduction', link: '/irregular/' },
-						{ label: '-ion and eu-', link: '/irregular/ion-eu/' },
-						{ label: 'sc, sch, and ch', link: '/irregular/sc-sch-ch/' },
-						{ label: 'k and sk', link: '/irregular/k-sk/' },
-						{ label: 'g and j', link: '/irregular/g-j/' },
+						{ label: 'Introduction', slug: 'irregular' },
+						{ label: '-ion and eu-', slug: 'irregular/ion-eu' },
+						{ label: 'sc, sch, and ch', slug: 'irregular/sc-sch-ch' },
+						{ label: 'k and sk', slug: 'irregular/k-sk' },
+						{ label: 'g and j', slug: 'irregular/g-j' },
 					],
 				},
 				{
 					label: 'Pitch Accent',
 					items: [
-						{ label: 'Introduction', link: '/accent/' },
+						{ label: 'Introduction', slug: 'accent' },
 					],
-				  },
+				},
 			],
 			customCss: [
 				'./src/styles/custom.css',
