@@ -1,0 +1,52 @@
+---
+title: Introduction
+description: Swedish pronunciation is full of surprises
+---
+
+import AudioButton from '../../../components/AudioButton.astro';
+import Mark from '../../../components/Mark.astro';
+import { Aside } from '@astrojs/starlight/components';
+
+Like English, Swedish has many irregularities in how the spelling of words and their pronunciation correspond to each other. Of course, Swedish spelling is a lot more consistent than English, but there are still plenty of surprises even after you learn the basic rules.
+
+This section is an attempt to present a reasonably complete list of these surprises, as far as consonants are concerned.
+
+## The morphemic principle
+
+One tricky thing common to both languages, as members of the Germanic language family, is that a vowel's pronunciation in a specific word depends on the letters that come after it.
+
+Compare:
+
+- 🇺🇸 *b<Mark>a</Mark>ck* (short) vs. *b<Mark>a</Mark>ke* (long)
+- 🇸🇪 *b<Mark>a</Mark>ck* (short) <AudioButton word="back" /> vs. tillb<Mark>a</Mark>ka <AudioButton word="tillbaka" /> (long)
+
+However, as Germanic languages, one thing both languages have in common is that when words or parts of words are combined to form inflections or compound words, each part (morpheme) maintains its original pronunciation.
+
+Consider how 🇺🇸 *foothold* is pronounced *foot•hold* and not ❌ *foo•<Mark>th</Mark>old*. Likewise, 🇸🇪 *solsken (sol•sken)* <AudioButton word="solsken" /> is pronounced *sol•<Mark>sj</Mark>en* while *risken (risk•en)* <AudioButton word="risken" /> is pronounced *risk•en* and not ❌ *ris•<Mark>sj</Mark>en*.
+
+<Aside type="note">
+If you're wondering what other options there could possibly be, it's worth noting that in some languages, the spelling stays the same, but the pronunciation of the parts might change (Korean, Portuguese); in others, sounds would be added or changed to make the new word easier to pronounce, and the spelling would change to reflect this (Russian).
+</Aside>
+
+This is important because it overrides "Swedish 101" pronunciation rules, such as the one about *k* and *g* being "soft" before *e, i, y, ä, ö* and "hard" before *a, o, u, å*. For example, the final *k* or *g* of a noun keeps its original hard or soft pronunciation even when a change in the following vowel would ordinarily make it hard or soft:
+
+- *sak* <AudioButton word="sak" /> -> *sa<Mark>k</Mark>•er* <AudioButton word="saker" /> (❌ *sa•<Mark>tj</Mark>er*)
+- *ga<Mark>lg</Mark>e* <AudioButton word="galge" /> -> *ga•<Mark>lg</Mark>ar* <AudioButton word="galgar" /> (❌ *gal•<Mark>g</Mark>ar*)
+
+Moreover, this principle means that exceptional pronunciations are properties of specific words rather than simply resulting from specific sequences of letters.
+
+For that reason, this list only contains the base forms of the relevant words, since all of a word's inflections will have the same irregularities in pronunciation as the base form—no more and no fewer.
+
+## What about vowels?
+
+The vowel *o* in particular is very tricky. The "Swedish 101" expectation is:
+
+- *gj<Mark>o</Mark>rde* <AudioButton word="gjorde" />, *h<Mark>o</Mark>s* <AudioButton word="hos" /> (short)
+- *sk<Mark>o</Mark>la* <AudioButton word="skola" />, *b<Mark>o</Mark>lag* <AudioButton word="bolag" /> (long)
+
+However, *o* is also very commonly pronounced like *å*:
+
+- *j<Mark>o</Mark>bb* <AudioButton word="jobb" />, *l<Mark>o</Mark>pp* <AudioButton word="lopp" /> (short)
+- *l<Mark>o</Mark>v* <AudioButton word="lov" />, *m<Mark>o</Mark>r* <AudioButton word="mor" /> (long)
+
+In fact, short *o* pronounced as /ɔ/ (*jobb, lopp*) is more common than short *o* pronounced as /ʊ/ (*gjort*, *hos*). Since there's no reliable spelling rule to predict which pronunciation applies, this is best looked up on a word-by-word basis — which is beyond the scope of this guide.
