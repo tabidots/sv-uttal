@@ -50,7 +50,7 @@ export default defineConfig({
 				},
 				{
 					tag: 'meta',
-					attrs: { property: 'og:image', content: 'https://tabidots.github.io/sv-uttal/hero.svg' },
+					attrs: { property: 'og:image', content: 'https://tabidots.github.io/sv-uttal/hero-og.png' },
 				},
 				{
 					tag: 'meta',
@@ -63,6 +63,10 @@ export default defineConfig({
 				{
 					tag: 'meta',
 					attrs: { property: 'og:image:height', content: '1200' },
+				},
+				{
+					tag: 'meta',
+					attrs: { property: 'og:image:type', content: 'image/png' },
 				},
 				{
 					tag: 'meta',
@@ -88,7 +92,7 @@ export default defineConfig({
 				},
 				{
 					tag: 'meta',
-					attrs: { name: 'twitter:image', content: 'https://tabidots.github.io/sv-uttal/hero.svg' },
+					attrs: { name: 'twitter:image', content: 'https://tabidots.github.io/sv-uttal/hero-og.png' },
 				},
 				{
 					tag: 'meta',
