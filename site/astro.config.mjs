@@ -50,7 +50,7 @@ export default defineConfig({
 				},
 				{
 					tag: 'meta',
-					attrs: { property: 'og:image', content: 'https://tabidots.github.io/sv-uttal/_astro/hero.D9qXNQyy_Z1HYzg2.svg' },
+					attrs: { property: 'og:image', content: 'https://tabidots.github.io/sv-uttal/hero.svg' },
 				},
 				{
 					tag: 'meta',
@@ -88,7 +88,7 @@ export default defineConfig({
 				},
 				{
 					tag: 'meta',
-					attrs: { name: 'twitter:image', content: 'https://tabidots.github.io/sv-uttal/_astro/hero.D9qXNQyy_Z1HYzg2.svg' },
+					attrs: { name: 'twitter:image', content: 'https://tabidots.github.io/sv-uttal/hero.svg' },
 				},
 				{
 					tag: 'meta',

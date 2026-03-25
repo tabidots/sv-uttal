@@ -87,6 +87,10 @@ def main():
             if word == "manskör":
                 pos = "noun"
                 morph = "UTR SIN IND NOM"
+            if word == "akvarierna":
+                morph = "NEU PLU DEF NOM"
+            if word == "operatorer":
+                phonetic = "u . p eh . r a . t 'u: . r ex r"
             if "f uu ng . k . x ,u: n" in phonetic:
                 phonetic = phonetic.replace("f uu ng . k . x ,u: n", "f uu n g k . x ,u: n")
             

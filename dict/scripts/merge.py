@@ -129,6 +129,23 @@ def add_syncretic_ids():
         c.executemany(
             "UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", pass_batch)
         
+        # Fix IND_PL syncretism (null-plural cases)
+        c.execute("""
+            SELECT w2.id, w1.braxen_ids
+            FROM sv_wiktionary w1
+            JOIN sv_wiktionary w2 ON w2.lemma = w1.lemma 
+                AND w2.pos = w1.pos
+                AND w2.which_lexeme = w1.which_lexeme
+            WHERE w1.braxen_ids NOT LIKE '%,%'
+                AND w2.braxen_ids IS NULL
+                AND w1.slot = 'IND_SG'
+                AND w2.slot = 'IND_PL'
+                AND w1.form = w2.form
+        """)
+        pl_batch = [(b, i) for i, b in c.fetchall() if b is not None]
+        c.executemany(
+            "UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", pl_batch)
+        
         # Fix missing adjective forms for a handful of forms where Braxen considers them adverbs
         c.execute("""
             SELECT word, id FROM braxen WHERE word IN
@@ -215,96 +232,8 @@ def resolve_ambiguous():
             c.execute("UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", (b_id, wik_id))
         conn.commit()
         
-
-
-def analyze():
-    with sqlite3.connect(DB_PATH) as conn:
-        c = conn.cursor()
-        c.execute("""
-            SELECT w.lemma,
-                w.pos,
-                w.which_lexeme,
-                GROUP_CONCAT(w.slot) AS slots,
-                GROUP_CONCAT(w.gender) AS genders,
-                GROUP_CONCAT(b.syllables) AS syllables,
-                GROUP_CONCAT(b.stress) AS stresses,
-                count(*) AS count
-            FROM sv_wiktionary w
-            JOIN braxen b ON CAST(w.braxen_ids AS INTEGER) = b.id
-            WHERE w.braxen_ids IS NOT NULL
-            AND w.braxen_ids NOT LIKE '%,%'
-            AND b.stress IS NOT NULL
-            AND w.pos = 'noun'
-            GROUP BY w.lemma, w.pos, w.which_lexeme
-        """)
-
-        exceptional_count = 0
-        total_count = 0
-
-        tor_sor = []
-        ium = []
-        ALL_STRESSES_BY_SLOT = Counter()
-
-        for lemma, pos, which_lexeme, slots_g, genders_g, syllables_g, stresses_g, count in c.fetchall():
-            slots = slots_g.split(",") if slots_g else ["" for _ in range(count)]
-            genders = genders_g.split(",") if genders_g else ["" for _ in range(count)]
-
-            if "|" in syllables_g:
-                continue
-            syllables = syllables_g.split(",")
-            stresses = stresses_g.split(",")
-
-            entries = list(zip(slots, genders, syllables, stresses))
-
-            total_count += 1
-
-            if not stresses:
-                continue
-            if len(set(stresses)) == 1:
-                continue
-
-            if lemma.endswith('tor') or lemma.endswith('sor'):
-                tor_sor.append(lemma)
-                continue
-            if lemma.endswith('ium'):
-                ium.append(lemma)
-                continue
-
-            stresses_by_slot = {}
-            for slot, gender, syl, stress in entries:
-                stresses_by_slot[slot] = stress
-            
-            try:
-                if stresses_by_slot["IND_SG"] != stresses_by_slot["DEF_SG"]:
-                    print(lemma)
-                elif stresses_by_slot["IND_PL"] != stresses_by_slot["DEF_PL"]:
-                    print(lemma)
-            except KeyError:
-                pass
-            
-            key = tuple(sorted(stresses_by_slot.items()))
-
-            ALL_STRESSES_BY_SLOT[key] += 1
-                
-                
-                # exceptional_count += 1
-                # lexeme_label = f" [{which_lexeme}]" if which_lexeme else ""
-                # print(f"\n{lemma}{lexeme_label} ({pos}): MIXED PATTERN")
-                # for slot, gender, syl, stress in entries:
-                #     print(f"\t{slot}\t{syl}\t{stress}")
-
-        print(f"\nTotal count: {total_count}")
-        print(f"Exceptional count: {exceptional_count}")
         
-        for slot, count in ALL_STRESSES_BY_SLOT.most_common():
-            print(f"\t{slot}: {count}")
-
-        print(f"\nTor/Sor: {tor_sor}")
-        print(f"\nIum: {ium}")
-
-
 if __name__ == "__main__":
     main()
     add_syncretic_ids()
     resolve_ambiguous()
-    # analyze()

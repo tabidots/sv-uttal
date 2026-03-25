@@ -138,6 +138,8 @@ def process_entry(word: str, phonetic: str, lemma: str) -> tuple[str, str, list[
                 irregular.append({"span": (winner, winner + 1), "type": "g as sj in -gera/-gering"}) 
             elif grapheme in {"c", "g", "j", "ch", "stg", "sch", "sc"}:
                 irregular.append({"span": (winner, vowel_idxs[i]), "type": f"{grapheme} as sj-sound"})
+            elif grapheme == "sk" and word[vowel_idxs[i]] in "aouå":
+                irregular.append({"span": (winner, vowel_idxs[i]), "type": "sk as sj-sound before hard vowel"})
             # The following applies even if the syllable is "tio(n)"
             if lower_word[vowel_idxs[i]:vowel_idxs[i]+2] == "io":
                 vowel_idxs.pop(i)
