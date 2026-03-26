@@ -1,0 +1,175 @@
+---
+title: Nouns
+description: Swedish pitch accent
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Mark from '../../../components/Mark.astro';
+import AudioButton from '../../../components/AudioButton.astro';
+import ShowTones from '../../../components/ShowTones.astro';
+
+This analysis is the result of examining 8186 distinct non-compound noun lexemes in Wiktionary using pronunciation data from the Braxen dataset. For the sake of simplicity, the following were excluded:
+
+- compound nouns
+- nouns that did not have a plural form
+- most lexemes that included one or more ambiguous wordforms
+
+## Tendencies
+
+### Polysyllabic nouns
+
+In the majority of cases, Swedish nouns are **polysyllabic** (the *dictionary form* has more than one syllable) and have a **stable** pitch accent across all forms, regardless of whether it is an acute or grave accent.
+
+6310/8003 (78.9%) of all nouns and 6310/6448 (97.8%) of polysyllabic nouns fit this description. 1123/6309 (17.8%) of these stable-accent nouns are *null-plural* nouns (the indefinite singular and plural forms are identical).
+
+| sing. indef. | sing. def. | plur. indef. |
+|---|---|---|
+| <ShowTones w="k↗ompis" /> <AudioButton word="kompis" /> | <ShowTones w="k↗ompisen" /> <AudioButton word="kompisen" /> | <ShowTones w="k↗ompisar" /> <AudioButton word="kompisar" /> |
+| <ShowTones w="but↗ik" /> <AudioButton word="butik" /> | <ShowTones w="but↗iken" /> <AudioButton word="butiken" /> | <ShowTones w="but↗iker" /> <AudioButton word="butiker" /> |
+| <ShowTones w="sp↗eg↘el" /> <AudioButton word="spegel" /> | <ShowTones w="sp↗eg↘eln" /> <AudioButton word="spegeln" /> | <ShowTones w="sp↗egl↘ar" /> <AudioButton word="speglar" /> |
+| <ShowTones w="proj↗ekt" /> <AudioButton word="projekt" /> | <ShowTones w="proj↗ektet" /> <AudioButton word="projektet" /> | <ShowTones w="proj↗ekt" /> (*def.* <ShowTones w="proj↗ekten" /> <AudioButton word="projekten" />) |
+
+### Monosyllabic nouns
+
+Meanwhile, 1057/1641 (64.9%) of **monosyllabic** nouns (where the *dictionary form* has one syllable) exhibit the following pattern: The primary stressed syllable remains the same throughout, but the plural forms **shift** to a grave accent, giving the impression of an "added" secondary stress.
+
+By definition, this will never occur in null-plural monosyllablic nouns.
+
+| sing. indef. | sing. def. | plur. indef. |
+|---|---|---|
+| <ShowTones w="kväll" /> <AudioButton word="kväll" /> | <ShowTones w="kv↗ällen" /> <AudioButton word="kvällen" /> | <ShowTones w="kv↗äll↘ar" /> <AudioButton word="kvällar" /> |
+| <ShowTones w="pris" /> <AudioButton word="pris" /> | <ShowTones w="pr↗iset" /> <AudioButton word="priset" /> | <ShowTones w="pr↗is↘er" /> <AudioButton word="priser" /> |
+| <ShowTones w="sjö" /> <AudioButton word="sjö" /> | <ShowTones w="sjön" /> <AudioButton word="sjön" /> | <ShowTones w="sj↗ö↘ar" /> <AudioButton word="sjöar" /> |
+
+## Exceptions
+
+### Polysyllabic nouns: acute to grave
+
+Fewer than 3% of polysyllabic nouns have a pitch accent pattern that **shifts** between singular and plural forms. The largest group of these is made up of nouns whose accent shifts from acute to grave (giving the impression of an "added" secondary stress). Notably, all of the days of the week are in this group. The remainder appear to be mostly nouns ending in unstressed *-er*, *-en*, *-el* in their dictionary form.
+
+| sing. indef. | sing. def. | plur. indef. |
+|---|---|---|
+| <ShowTones w="l↗ördag" /> <AudioButton word="lördag" /> | <ShowTones w="l↗ördagen" /> | <ShowTones w="l↗örd↘agar" /> <AudioButton word="lördagar" /> |
+| <ShowTones w="v↗erkstad" /> <AudioButton word="verkstad" /> | <ShowTones w="v↗erksta(de)n" /> | <ShowTones w="v↗erkst↘äder" /> <AudioButton word="verkstäder" /> |
+| <ShowTones w="↗öken" /> <AudioButton word="öken" /> | <ShowTones w="↗öknen" /> <AudioButton word="öknen" /> | <ShowTones w="↗ökn↘ar" /> <AudioButton word="öknar" /> |
+| <ShowTones w="t↗itel" /> <AudioButton word="titel" /> | <ShowTones w="t↗iteln" /> <AudioButton word="titeln" /> | <ShowTones w="t↗itl↘ar" /> <AudioButton word="titlar" /> |
+| <ShowTones w="fj↗äder" /> <AudioButton word="fjäder" /> | <ShowTones w="fj↗ädern" /> <AudioButton word="fjädern" /> | <ShowTones w="fj↗ädr↘ar" /> <AudioButton word="fjädrar" /> |
+
+<details>
+  <summary>Polysyllabic nouns with acute-to-grave shift in plural (134)</summary>
+  angel, apel, basker, besserwisser, bibel, blinker, blunder, botten, braxen, buffel, bunker, bäver, ceder, cykel, dager, diesel, drummel, dumper, däxel, ejder, ester, feber, fjäder, flipper (in the sense of *pinball flipper*), fläder, fredag, fröken, fågel, födsel, gaffel, gangster, gavel, gejser, gletscher, hamster, hassel, hummer, hyvel, häger, iller, joker, jumper, kabel, klammer, klädsel, koster, krater, kummel (in the sense of "fish"; *pl.* kumlar), kägel, lager (in the sense of "laurel"; *pl.* lagrar), laser, lever, lördag, mangel, mickel, middag, mixer, monter, mutter (in the sense of "nut" [hardware item]; *pl.* muttrar), myrten, måndag, nagel, näver, ockel, onsdag, orden, oxel, paddel, panter, papel, pimpel, pixel, poppel, poster, puckel, pudel, putter (in the sense of "putter" [golf club]; *pl.* puttrar), sabel, sadel, salsa, scanner, schackel, schäfer, sedel, seger, server, setter, singel, skanner, skiffer, skoter, skovel, skvader, sliper, slåtter, snabel, sockel, socken, spackel (in the sense of "putty knife"; *pl.* spacklar), speaker, spjuver, styver, stövel, sura, svåger, söndag, taffel, tanker, thriller, tiger, tisdag, titel, toffel, torsdag, trailer, trimmer, tryffel, utter, vagel, vajer, vardag, venetianska, verkstad, vesper, vigsel, vinter, växel, ytter, åder, åker, ålder, öken
+</details>
+
+### Monosyllabic nouns with stable accent
+
+The minority (576/1641, 35.1%) of monosyllabic nouns (having one syllable in the *dictionary form*) have a **stable** pitch accent across all forms. 478 of those nouns are *null-plural* nouns, and 3 more (*ko, klo, vrå*) are monosyllabic in the indefinite plural.
+
+| sing. indef. | sing. def. | plur. indef. |
+|---|---|---|
+| <ShowTones w="hand" /> <AudioButton word="hand" /> | <ShowTones w="h↗anden" /> <AudioButton word="handen" /> | <ShowTones w="h↗änder" /> <AudioButton word="händer" /> |
+| <ShowTones w="nöt" /> <AudioButton word="nöt" /> | <ShowTones w="n↗öten" /> <AudioButton word="nöten" /> | <ShowTones w="n↗ötter" /> <AudioButton word="nötter" /> |
+| <ShowTones w="mål" /> <AudioButton word="mål" /> | <ShowTones w="m↗ålet" /> <AudioButton word="målet" /> | <ShowTones w="mål" /> (*def.* <ShowTones w="m↗ålen" /> <AudioButton word="målen" />) |
+| <ShowTones w="klo" /> <AudioButton word="klo" /> | <ShowTones w="klon" /> <AudioButton word="klon" /> | <ShowTones w="klor" /> <AudioButton word="klor" /> |
+| <ShowTones w="jobb" /> <AudioButton word="jobb" /> | <ShowTones w="j↗obbet" /> <AudioButton word="jobbet" /> | <ShowTones w="jobb" /> <AudioButton word="jobb" /> (*def.* <ShowTones w="j↗obben" /> <AudioButton word="jobben" />) |
+
+<details>
+  <summary>Monosyllabic nouns with stable accent (not null-plural) (98)</summary>
+  alf, alg, alp, and, balt, bask, bi, bo, bok (in the sense of "book"; *pl.* böcken), bomb, brand, britt, cell, dan, dogm, dom (in the sense of "dome"; *pl.* domer), dront, drus, est, fajt, fjord, flank, fot, fris, front, fä, gen, get, gli, graf, grek, gränd, gäl (in the sense of "Gael"; *pl.* gäler), gås, göt, hand, hyf, här, jamb, jon, kelt, khmer, klo, knä, ko, kopt, krans, kurd, kvidd, kvot, larv, lett, länd, man (in the sense of "man"; *pl.* män, männen), mark, mus, natt, nerv, norm, nöt, peng, plomb, por, rand, rom, romb, rot, rö, sak, sard, schakt, scout, serb, skri, skrå, skyt, spa, spann, spasm, spor, spång, spö, strand, strå, stång, sven, tand, tent, term, tjeck, tom, tromb, tång, van, ven, vrå, zoo
+</details>
+
+<details>
+  <summary>Monosyllabic nouns with stable accent (null-plural) (459)</summary>
+  agn, aiss, ar, ark, arr, arv, as (in the sense of "carcass"), ass, ax, bad, bak (in the sense of "baking"), band, bann, barn, barr, ben, berg, bett, blad, blask, block, bloss, blot, blänk, bord, borst, brak, brev, brosk, brott, bruk, bryn, bråck, bråk, bröd, bröl, bröst, bud, bär, bärs, bål (in the sense of "bonfire"), bås, case, cent, cess, chips, ciss, dass (in the sense of "outhouse"), dess, diss, djup, djur, don, dop, dopp, drag, drev, dråp, dun, dygn, dyk, däck, dåd, dån, eiss, ess, fack, fall, fan, fat, fejs, fel, fess, fik, fiss, fjun, fjäll, flak, flams, flarn, flin, flor, flyg, flämt, fnask, fniss, folk, fort, fusk, fynd, fält, fån, fång, får, föl, gap, garn, garv, gem, gess, gig, glapp, glas, glid, gläfs, gnabb, gnägg, gods, golv, gram, grand, grepp, gross, gruff, grund (in the sense of "shallows"), gryn, gryt, gräl, gräs, gräv, guld, gull, gupp, gym, gäll, gäng, göt, hak, hav, heat, hem, hjul, hopp, horn, hot, hov (in the sense of "imperial/royal court"), hugg, hus, hyss, hål, håll, hår, höns, hörn, jag, jam, jobb, juck, jäkt, järn, jäv, kall, kar, kart, kast (in the sense of "a throw"), kex, kid, kladd (in the sense of "goo"), klick (in the sense of "a click"), klipp, kliv, klot, kluck, kludd, kneg, knep, knip, knog, knott, knull, kok, kol, komp, kor, korn, kors, kort, krav, krax, krig, krus, krux, kryp, kryss, kräk, krås, krön, kurr, kvack, kvad, kval, kvinns, kärl, kärr, kök, kön, köp, labb (as a shortening of "🇺🇸 lab"), lag (in the sense of "team"), lamm, land, larm, lass, led (in the sense of "queue, rank"), leg, legg, ligg, lik, lim, liv, ljud, ljus, lock (in the sense of "lid"), lod, loft, lok, lopp, lov (in the sense of "permission, time off"), lägg, län, läsk, lån, lår (in the sense of "thigh"), lås, löp, löv, mail, mejl, men, mil, mjöl, mol, moln, mord, mot, mynt, mål, mått, nafs, namn, napp (in the sense of "bite, positive response"), nav, nej, nor, nyp, näs, näst, nät, nöt, ok, or, ord, orv, os, pall (in the crime-slang sense of "apple"), pang, par, pass, pip (in the sense of "beep"), plagg, plan (in the sense of "flat surface"), plank, plask, plejs, pling, plock, plugg (in the slang sense of "school, studying"), plums, plus, plån, proffs, prov, pränt, prång, pund, rapp, ras (in the sense of "collapse, mudslide"), rask, regn, rep, rev (in the sense of "reef"), rim, ris, rop, rum, rus, russ, ryck, råd, rån, rön, rör, schakt, set, sim, sjok, skaft, skal, skall, skalv, sken, skepp, skick, skift, skikt, skinn, skjul, skjut, skoj, skott, skov, skrank, skrap, skratt, skrev, skrik, skrin, skrock, skrov, skrän, skrål, skum, skutt, skvalp, skydd, skägg, skäl, skämt, skär, skärp, skåp, skört, slag, slask (in the sense of "slush"), slem, slott, slut, släp, släpp, slån, smil, smör, snack, snark, snitt, snusk, snyft, snäpp, snår, sound, spam, spant, spel, spett, spex, spill, spjut, spjäll, spratt, sprut, språk, språng, spröt, spån, spår, stag, stall, stalp, stamp (in the sense of "a stomp"), steg, stek (in the sense of "knot"), stick, stift, stim, stoff, stop, stopp, straff (in the sense of "penalty"), streck, strul, stråk, strög, stunt, stup, stygn, städ, ställ, stänk, stäv (in the sense of "proverb"), stål, stånd, stöd, stön, sudd (in the sense of "something blurry"), sund, svalg, svall, svar, svek, svin, svinn, svärd, sätt, såll, sår, tack, tag, tak, tal, team, test (in the sense of "examination, attempt"), tick, ting, tips, tjafs, tjim, tjog, tjut, tjäll, ton (in the sense of "🇺🇸 ton"), torg, torn (in the sense of "tower"), torp, tramp, troll, tryck, träd, träsk, tråg, tum, tut (in the sense of "toot, honk"), tvång, tält, tåg, uns, ur, vad, val, valv, vant, var, varv, veck, verb, verk, vis, volt, vrak, vred, vrål, värn, våp, yl, ägg, ärr, äss, åk, år, ök
+</details>
+
+### Monosyllabic nouns with "hidden" grave accent (7)
+
+There are a few monosyllabic nouns in the data that have a grave accent in all forms except the dictionary form. A monosyllabic word cannot have a grave accent, but since the primary stress remains on the same syllable throughout, these can be interpreted as having a "hidden" grave accent.
+
+The data below is taken from Braxen. The synthesized audio may not agree. (These may be errors.)
+
+| sing. indef. | sing. def. | plur. indef. |
+|---|---|---|
+| <ShowTones w="b↗et↘_" /> <AudioButton word="bet" /> | <ShowTones w="b↗et↘en" /> <AudioButton word="beten" /> | <ShowTones w="b↗et↘ar" /> <AudioButton word="betar" /> |
+| <ShowTones w="↗ort↘_" /> <AudioButton word="ort" /> | <ShowTones w="↗ort↘en" /> <AudioButton word="orten" /> | <ShowTones w="↗ort↘er" /> <AudioButton word="orter" /> |
+| <ShowTones w="p↗ir↘_" /> <AudioButton word="pir" /> | <ShowTones w="p↗ir↘en" /> <AudioButton word="piren" /> | <ShowTones w="p↗ir↘ar" /> <AudioButton word="pirar" /> |
+| <ShowTones w="r↗igg↘_" /> <AudioButton word="rigg" /> | <ShowTones w="r↗igg↘en" /> <AudioButton word="riggen" /> | <ShowTones w="r↗igg↘ar" /> <AudioButton word="riggar" /> |
+| <ShowTones w="sk↗öt↘_" /> <AudioButton word="sköt" /> | <ShowTones w="sk↗öt↘en" /> <AudioButton word="sköten" /> | <ShowTones w="sk↗öt↘ar" /> <AudioButton word="skötar" /> |
+| <ShowTones w="sn↗opp↘_" /> <AudioButton word="snopp" /> | <ShowTones w="sn↗opp↘en" /> <AudioButton word="snoppen" /> | <ShowTones w="sn↗opp↘ar" /> <AudioButton word="snoppar" /> |
+| <ShowTones w="t↗örn↘_" /> <AudioButton word="törn" /> | <ShowTones w="t↗örn↘en" /> <AudioButton word="törnen" /> | <ShowTones w="t↗örn↘ar" /> <AudioButton word="törnar" /> |
+
+## Special cases
+
+There are some unusual patterns in nouns derived from Latin with the endings *-ik, -ium/-eum, -tor/-sor.*
+
+All the data below is taken from Braxen. The synthesized audio may not agree. (These may be errors.)
+
+### Nouns in -tor/-sor (81)
+
+The grave accent shifts to acute in the plural, but the primary stressed syllable shifts forward by one.
+
+| sing. indef. | sing. def. | plur. indef. |
+|---|---|---|
+| <ShowTones w="acceler↗at↘or" /> <AudioButton word="accelerator" /> | <ShowTones w="acceler↗at↘orn" /> <AudioButton word="acceleratorn" /> | <ShowTones w="accelerat↗orer" /> <AudioButton word="acceleratorer" /> |
+| <ShowTones w="allig↗at↘or" /> <AudioButton word="alligator" /> | <ShowTones w="allig↗at↘orn" /> <AudioButton word="alligatorn" /> | <ShowTones w="alligat↗orer" /> <AudioButton word="alligatorer" /> |
+| <ShowTones w="d↗at↘or" /> <AudioButton word="dator" /> | <ShowTones w="d↗at↘orn" /> <AudioButton word="datorn" /> | <ShowTones w="dat↗orer" /> <AudioButton word="datorer" /> |
+| <ShowTones w="gener↗ator" /> <AudioButton word="generator" /> | <ShowTones w="gener↗atorn" /> <AudioButton word="generatorn" /> | <ShowTones w="generat↗orer" /> <AudioButton word="generatorer" /> |
+| <ShowTones w="res↗ist↘or" /> <AudioButton word="resistor" /> | <ShowTones w="res↗istorn" /> <AudioButton word="resistorn" /> | <ShowTones w="resist↗orer" /> <AudioButton word="resistorer" /> |
+| <ShowTones w="oper↗at↘or" /> <AudioButton word="operator" /> | <ShowTones w="oper↗at↘orn" /> <AudioButton word="operatorn" /> | <ShowTones w="operat↗orer" /> <AudioButton word="operatorer" /> |
+| <ShowTones w="agit↗at↘or" /> <AudioButton word="agitator" /> | <ShowTones w="agit↗at↘orn" /> <AudioButton word="agitatorn" /> | <ShowTones w="agitat↗orer" /> <AudioButton word="agitatorer" /> |
+| <ShowTones w="prof↗ess↘or" /> <AudioButton word="professor" /> | <ShowTones w="prof↗ess↘orn" /> <AudioButton word="professorn" /> | <ShowTones w="profess↗orer" /> <AudioButton word="professorer" /> |
+
+<details>
+  <summary>All nouns in -tor/-sor (81)</summary>
+  accelerator, ackumulator, agitator, alligator, arrendator, assessor, censor, dator, destillator, detektor, diktator, doktor, donator, elektor, elevator, emulator, emulgator, faktor, funktor, generator, gladiator, indikator, informator, inhalator, inkvisitor, inspektor, interpretator, isolator, kalfaktor, kalkylator, kantor, karburator, katalysator, kiropraktor, kommentator, kommutator, kompilator, komprimator, kondensator, konditor, koordinator, kurator, lektor, liktor, mentor, moderator, motor, operator, orator, pastor, perkolator, plagiator, pretor, professor, projektor, radiator, reaktor, reformator, registrator, rektor, resistor, respirator, revisor, rollator, rullator, sektor, senator, sensor, separator, sponsor, stabilisator, tensor, termistor, traktor, transformator, transistor, triumfator, tyristor, usurpator, vektor, vibrator
+</details>
+
+### Nouns in -ium/-eum (9)
+
+The grave accent shifts to acute in the plural, but the primary stressed syllable stays the same.
+
+| sing. indef. | sing. def. | plur. indef. |
+|---|---|---|
+| <ShowTones w="mus↗e↘um" /> <AudioButton word="museum" /> | <ShowTones w="mus↗e↘et" /> <AudioButton word="museet" /> | <ShowTones w="mus↗eer" /> <AudioButton word="museer" /> |
+| <ShowTones w="sol↗ari↘um" /> <AudioButton word="solarium" /> | <ShowTones w="sol↗ariet" /> <AudioButton word="solariet" /> | <ShowTones w="sol↗arier" /> <AudioButton word="solarier" /> |
+| <ShowTones w="akv↗ari↘um" /> <AudioButton word="akvarium" /> | <ShowTones w="akv↗ari↘et" /> <AudioButton word="akvariet" /> | <ShowTones w="akv↗arier" /> <AudioButton word="akvarier" /> |
+| <ShowTones w="provis↗ori↘um" /> <AudioButton word="provisorium" /> | <ShowTones w="provis↗ori↘et" /> <AudioButton word="provisoriet" /> | <ShowTones w="provis↗orier" /> <AudioButton word="provisorier" /> |
+| <ShowTones w="kremat↗ori↘um" /> <AudioButton word="krematorium" /> | <ShowTones w="kremat↗ori↘et" /> <AudioButton word="krematoriet" /> | <ShowTones w="kremat↗orier" /> <AudioButton word="krematorier" /> |
+| <ShowTones w="territ↗ori↘um" /> <AudioButton word="territorium" /> | <ShowTones w="territ↗ori↘et" /> <AudioButton word="territoriet" /> | <ShowTones w="territ↗orier" /> <AudioButton word="territorier" /> |
+| <ShowTones w="jubil↗e↘um" /> <AudioButton word="jubileum" /> | <ShowTones w="jubil↗e↘et" /> <AudioButton word="jubileet" /> | <ShowTones w="jubil↗eer" /> <AudioButton word="jubileer" /> |
+| <ShowTones w="observat↗ori↘um" /> <AudioButton word="observatorium" /> | <ShowTones w="observat↗ori↘et" /> <AudioButton word="observatoriet" /> | <ShowTones w="observat↗or↘ier" /> <AudioButton word="observatorier" /> |
+| <ShowTones w="invent↗ari↘um" /> <AudioButton word="inventarium" /> | <ShowTones w="invent↗ari↘et" /> <AudioButton word="inventariet" /> | <ShowTones w="invent↗arier" /> <AudioButton word="inventarier" /> |
+
+### Nouns in -ik (7)
+
+The stressed syllable shifts back by one in the plural.
+
+| sing. indef. | sing. def. | plur. indef. |
+|---|---|---|
+| <ShowTones w="grammat↗ik" /> <AudioButton word="grammatik" /> | <ShowTones w="grammat↗iken" /> <AudioButton word="grammatiken" /> | <ShowTones w="gramm↗atiker" /> <AudioButton word="grammatiker" /> |
+| <ShowTones w="histor↗ik" /> <AudioButton word="historik" /> | <ShowTones w="histor↗iken" /> <AudioButton word="historiken" /> | <ShowTones w="hist↗oriker" /> <AudioButton word="historiker" /> |
+| <ShowTones w="prakt↗ik" /> <AudioButton word="praktik" /> | <ShowTones w="prakt↗iken" /> <AudioButton word="praktiken" /> | <ShowTones w="pr↗aktiker" /> <AudioButton word="praktiker" /> |
+| <ShowTones w="tekn↗ik" /> <AudioButton word="teknik" /> | <ShowTones w="tekn↗iken" /> <AudioButton word="tekniken" /> | <ShowTones w="t↗ekniker" /> <AudioButton word="tekniker" /> |
+| <ShowTones w="polem↗ik" /> <AudioButton word="polemik" /> | <ShowTones w="polem↗iken" /> <AudioButton word="polemiken" /> | <ShowTones w="pol↗emiker" /> <AudioButton word="polemiker" /> |
+| <ShowTones w="klin↗ik" /> <AudioButton word="klinik" /> | <ShowTones w="klin↗iken" /> <AudioButton word="kliniken" /> | <ShowTones w="kl↗iniker" /> <AudioButton word="kliniker" /> |
+| <ShowTones w="takt↗ik" /> <AudioButton word="taktik" /> | <ShowTones w="takt↗iken" /> <AudioButton word="taktiken" /> | <ShowTones w="t↗aktiker" /> <AudioButton word="taktiker" /> |
+
+## Anomalies
+
+13 nouns in the analysis did not fit any of the patterns above, so they may be errors in the data, or something completely anomalous.
+
+| sing. indef. | sing. def. | plur. indef. |
+|---|---|---|
+| <ShowTones w="b↗ond↘e" /> <AudioButton word="bonde" /> | <ShowTones w="b↗ond↘en" /> <AudioButton word="bonden" /> | <ShowTones w="b↗önder" /> <AudioButton word="bönder" /> |
+| <ShowTones w="donj↗uan" /> <AudioButton word="donjuan" /> | <ShowTones w="donj↗uanen" /> <AudioButton word="donjuanen" /> | <ShowTones w="donju↗aner" /> <AudioButton word="donjuaner" /> |
+| <ShowTones w="fr↗änd↘e" /> <AudioButton word="frände" /> | <ShowTones w="fr↗änd↘en" /> <AudioButton word="fränden" /> | <ShowTones w="fr↗änder" /> <AudioButton word="fränder" /> |
+| <ShowTones w="f↗ad↘er" /> <AudioButton word="fader" /> | <ShowTones w="f↗ad↘ern" /> <AudioButton word="fadern" /> | <ShowTones w="f↗äder" /> <AudioButton word="fäder" /> |
+| <ShowTones w="f↗ara↘o" /> <AudioButton word="farao" /> | <ShowTones w="f↗ara↘on" /> <AudioButton word="faraon" /> | <ShowTones w="fara↗oner" /> <AudioButton word="faraoner" /> |
+| <ShowTones w="f↗emin↘inum" /> <AudioButton word="femininum" /> | <ShowTones w="f↗emin↘inet" /> <AudioButton word="femininet" /> | <ShowTones w="f↗emininer" /> <AudioButton word="femininer" /> |
+| <ShowTones w="f↗ot↘on" /> <AudioButton word="foton" /> | <ShowTones w="fot↗onen" /> <AudioButton word="fotonen" /> | <ShowTones w="fot↗oner" /> <AudioButton word="fotoner" /> |
+| <ShowTones w="k↗ansler" /> <AudioButton word="kansler" /> | <ShowTones w="k↗anslern" /> <AudioButton word="kanslern" /> | <ShowTones w="kansl↗erer" /> <AudioButton word="kanslerer" /> |
+| <ShowTones w="k↗ompan↘i" /> <AudioButton word="kompani" /> | <ShowTones w="kompan↗iet" /> <AudioButton word="kompaniet" /> | <ShowTones w="kompan↗ier" /> <AudioButton word="kompanier" /> |
+| <ShowTones w="k↗ons↘ul" /> <AudioButton word="konsul" /> | <ShowTones w="k↗ons↘uln" /> <AudioButton word="konsuln" /> | <ShowTones w="kons↗uler" /> <AudioButton word="konsuler" /> |
+| <ShowTones w="k↗orr↘e" /> <AudioButton word="korre" /> | <ShowTones w="k↗orr↘en" /> <AudioButton word="korren" /> | <ShowTones w="k↗orrar" /> <AudioButton word="korrar" /> |
+| <ShowTones w="n↗inj↘a" /> <AudioButton word="ninja" /> | <ShowTones w="n↗injan" /> <AudioButton word="ninjan" /> | <ShowTones w="n↗injor" /> <AudioButton word="ninjor" /> |
+| <ShowTones w="s↗amb↘a" /> <AudioButton word="samba" /> | <ShowTones w="s↗amb↘an" /> <AudioButton word="samban" /> | <ShowTones w="s↗ambor" /> <AudioButton word="sambor" /> |

@@ -1,0 +1,66 @@
+---
+// ShowTones.astro
+// Usage: <ShowTones w="but↗ik" />
+
+interface Props {
+    w: string;
+}
+
+const { w } = Astro.props as Props;
+
+const cells: { char: string; arrow?: string }[] = [];
+const chars = Array.from(w);
+
+for (let i = 0; i < chars.length; i++) {
+    const c = chars[i];
+
+    if (c === "↗" || c === "↘") {
+        const next = chars[i + 1];
+        if (next) {
+            cells.push({ char: next, arrow: c });
+            i++;
+        }
+    } else {
+        cells.push({ char: c });
+    }
+}
+---
+
+<span class="tone-wrapper">
+    {
+        cells.map((cell) => (
+            <span class="tone-cell">
+                {cell.arrow && <span class="tone-arrow">{cell.arrow}</span>}
+                <span class="tone-char">{cell.char}</span>
+            </span>
+        ))
+    }
+</span>
+
+<style>
+    .tone-wrapper {
+        display: inline-flex;
+        vertical-align: baseline;
+    }
+
+    .tone-cell {
+        position: relative;
+        display: inline-block;
+        margin-top: 0.4em;
+    }
+
+    .tone-char {
+        line-height: 1;
+    }
+
+    .tone-arrow {
+        position: absolute;
+        top: -0.4em;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.65em;
+        font-weight: 900;
+        line-height: 1;
+        pointer-events: none;
+    }
+</style>

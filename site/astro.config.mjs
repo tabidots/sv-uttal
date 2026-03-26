@@ -25,12 +25,14 @@ export default defineConfig({
 						{ label: 'sc, sch, and ch', slug: 'irregular/sc-sch-ch' },
 						{ label: 'k and sk', slug: 'irregular/k-sk' },
 						{ label: 'g and j', slug: 'irregular/g-j' },
+						{ label: 'Most frequent surprises', slug: 'irregular/frequent' },
 					],
 				},
 				{
-					label: 'Pitch Accent',
+					label: 'Shifting accents',
 					items: [
 						{ label: 'Introduction', slug: 'accent' },
+						{ label: 'Nouns', slug: 'accent/nouns' },
 					],
 				},
 			],

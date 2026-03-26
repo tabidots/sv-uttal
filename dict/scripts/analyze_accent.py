@@ -1,42 +1,17 @@
 from dict.scripts.paths import DB_PATH
 from collections import Counter
 import sqlite3
-
-def analyze():
-    with sqlite3.connect(DB_PATH) as conn:
-        c = conn.cursor()
-
-        wordforms = {}
-        c.execute("""
-            SELECT w.lemma, w.which_lexeme, w.form, w.slot, b.phonetic, b.syllables, b.stress 
-            FROM sv_wiktionary w
-            JOIN braxen b ON CAST(w.braxen_ids AS INTEGER) = b.id
-            WHERE w.braxen_ids NOT LIKE '%,%'
-        """)
-        for lemma, which_lexeme, form, slot, phonetic, syllables, stress in c.fetchall():
-            key = lemma
-            if which_lexeme > 0:
-                key += f"_{which_lexeme}"
-            
-            is_monosyllable = not any(x in phonetic for x in ".~-")
-
-            if key not in wordforms:
-                wordforms[key] = {
-                    "which_lexeme": which_lexeme,
-                    "is_monosyllable": is_monosyllable,
-                    "forms": {},
-                }
-            wordforms[key]["forms"][slot] = {
-                "form": form,
-                "syllables": syllables,
-                "stress": stress,
-            }
+from pprint import pprint
 
 
 def count_syllables(phonetic: str) -> int:
     if not phonetic:
         return 0
     return phonetic.count('.') + phonetic.count('-') + phonetic.count('~') + 1
+
+
+def is_umlaut_plural(sg: str, pl: str) -> bool:
+    return pl.count("ä") > sg.count("ä") or pl.count("ö") > sg.count("ö")
 
 
 def analyze_accent_patterns():
@@ -47,51 +22,52 @@ def analyze_accent_patterns():
         lexemes = {}
 
         c.execute("""
-            SELECT w.lemma, w.which_lexeme, w.form, w.slot, b.phonetic, b.syllables, b.stress 
+            SELECT w.lemma, w.which_lexeme, w.gender, w.form, w.slot, b.phonetic, b.syllables, b.stress 
             FROM sv_wiktionary w
             JOIN braxen b ON CAST(w.braxen_ids AS INTEGER) = b.id
             WHERE w.braxen_ids NOT LIKE '%,%'
               AND w.pos = 'noun'
+              AND b.syllables NOT LIKE '%|%'
         """)
 
-        for lemma, which_lexeme, form, slot, phonetic, syllables, stress in c.fetchall():
-            key = lemma if which_lexeme == 0 else f"{lemma}_{which_lexeme}"
-
-            # Detect if lexeme base form is monosyllabic
-            # More accurate: check the IND_SG form
-            is_monosyllabic_base = None
+        for lemma, which_lexeme, gender, form, slot, phonetic, syllables, stress in c.fetchall():
+            key = f"{lemma}_{gender}" if which_lexeme == 0 else f"{lemma}_{gender}{which_lexeme}"
 
             lexemes.setdefault(key, {
                 "lemma": lemma,
                 "which_lexeme": which_lexeme,
                 "forms": {},
-                "syllable_count": {},
                 "stress_patterns": {}
             })
 
             lexemes[key]["forms"][slot] = {
                 "form": form,
                 "syllables": syllables,
+                "is_monosyllable": count_syllables(phonetic) == 1,
                 "stress": stress,
                 "phonetic": phonetic
             }
 
         # Now analyze each lexeme
         patterns = {
-            "stable_polysyllabic": [],
-            "shifting_polysyllabic": [],
-            "hidden_accent_monosyllabic": [],
+            "acute_to_grave": [],
             "simple_monosyllabic": [],
+            "hidden_grave_accent": [],
             "suspicious": [],
             "tor_sor": [],
-            "ium": []
+            "um": [],
+            "ik": [],
         }
+
+        stable_polysyllabic_count = 0
+        hidden_grave_accent_count = 0
+        mono_null_plurals = set()
 
         for key, data in lexemes.items():
             forms = data["forms"]
 
-            # Skip if missing key forms
-            if 'IND_SG' not in forms or 'IND_PL' not in forms or 'DEF_SG' not in forms or 'DEF_PL' not in forms:
+            # Skip if missing key forms; Braxen is missing a lot of DEF_PL forms
+            if 'IND_SG' not in forms or 'IND_PL' not in forms:
                 continue
 
             ind_sg = forms['IND_SG']
@@ -101,50 +77,52 @@ def analyze_accent_patterns():
             sg_stress = ind_sg.get('stress')
             pl_stress = ind_pl.get('stress')
 
+            # Missing data
             if not sg_stress or not pl_stress:
                 continue
-
-            # Check if forms are distinct or syncretic
-            forms_distinct = ind_sg['form'] != ind_pl['form']
-            umlaut_plural = ind_pl['form'].count("ö") > ind_sg['form'].count(
-                "ö") or ind_pl['form'].count("ä") > ind_sg['form'].count("ä")
-                
-
-            # Determine syllable count from IND_SG phonetic
-            sg_phonetic = ind_sg['phonetic']
-            sg_syllable_count = count_syllables(sg_phonetic)
-
-            # Check if base is monosyllabic
-            is_monosyllabic = sg_syllable_count == 1
+            # Stable polysyllabic stress
+            if sg_stress == pl_stress and not ind_sg.get("is_monosyllable"):
+                stable_polysyllabic_count += 1
+                continue
+            # Hidden grave accent
+            if sg_stress != pl_stress and ind_sg.get("is_monosyllable"):
+                if def_sg_stress := forms.get('DEF_SG', {}).get('stress'):
+                    # Monosyllabic nouns' definite singular also with grave accent
+                    # bet, ort, rigg, pir, sköt, snopp, törn
+                    if def_sg_stress != sg_stress:
+                        patterns["hidden_grave_accent"].append({
+                            "lexeme": key,
+                            "word": ind_sg['form'],
+                            "sg_stress": sg_stress,
+                            "pl_stress": pl_stress,
+                            "def_sg": forms.get('DEF_SG', {}).get('form'),
+                            "ind_pl": forms.get('IND_PL', {}).get('form'),
+                            "word_syllables": ind_sg.get('syllables'),
+                            "def_sg_syllables": forms.get('DEF_SG', {}).get('syllables'),
+                            "ind_pl_syllables": forms.get('IND_PL', {}).get('syllables'),
+                        })
+                # Monosyllabic nouns with hidden grave whose def sg is also monosyllabic
+                # sky, by, fe, vy, lo, bro, sjö, mo, så, slå, fru, kö
+                hidden_grave_accent_count += 1
+                continue
+            # Null plural (ett bolag, flera bolag; ett mål, flera mål)
+            # There are no instances where a *single* lexeme will have a null plural with
+            # a different stress pattern than the singular
+            if ind_pl.get("form") == ind_sg.get("form"):
+                mono_null_plurals.add(ind_sg.get("form"))
+                continue
 
             # Analyze stress pattern
             sg_has_secondary = '-' in sg_stress if sg_stress else False
             pl_has_secondary = '-' in pl_stress if pl_stress else False
 
-            # Categorize
-            if not forms_distinct:
-                # Syncretic forms - skip or mark separately
-                continue
-
-            elif is_monosyllabic:
-                # Hidden accent pattern: monosyllabic base should gain secondary in inflected
-                if not sg_has_secondary and pl_has_secondary:
-                    patterns["hidden_accent_monosyllabic"].append({
-                        "lexeme": key,
-                        "word": ind_sg['form'],
-                        "sg_stress": sg_stress,
-                        "pl_stress": pl_stress,
-                        "pl_word": ind_pl['form']
-                    })
-                else:
-                    patterns["simple_monosyllabic"].append({
-                        "lexeme": key,
-                        "word": ind_sg['form'],
-                        "pl_word": ind_pl['form'],
-                        "type": "simple_monosyllabic",
-                        "sg_stress": sg_stress,
-                        "pl_stress": pl_stress
-                    })
+            if ind_sg.get("is_monosyllable"):
+                patterns["simple_monosyllabic"].append({
+                    "lexeme": key,
+                    "word": ind_sg['form'],
+                    "sg_stress": sg_stress,
+                    "pl_stress": pl_stress,
+                })
 
             elif data["lemma"].endswith(('tor', 'sor')):
                 # Latin -tor/-sor nouns
@@ -153,38 +131,47 @@ def analyze_accent_patterns():
                     "word": ind_sg['form'],
                     "sg_stress": sg_stress,
                     "pl_stress": pl_stress,
-                    "sg_has_secondary": sg_has_secondary,
-                    "pl_has_secondary": pl_has_secondary
+                    "def_sg": forms.get('DEF_SG', {}).get('form'),
+                    "ind_pl": forms.get('IND_PL', {}).get('form'),
+                    "word_syllables": ind_sg.get('syllables'),
+                    "def_sg_syllables": forms.get('DEF_SG', {}).get('syllables'),
+                    "ind_pl_syllables": forms.get('IND_PL', {}).get('syllables'),
                 })
 
-            elif data["lemma"].endswith('ium'):
-                # Latin -ium nouns
-                patterns["ium"].append({
-                    "lexeme": key,
-                    "word": ind_sg['form'],
-                    "sg_stress": sg_stress,
-                    "pl_stress": pl_stress
-                })
-
-            elif sg_has_secondary == pl_has_secondary:
-                # Stable accent pattern
-                if sg_syllable_count > 1:
-                    patterns["stable_polysyllabic"].append({
-                        "lexeme": key,
-                        "word": ind_sg['form'],
-                        "sg_stress": sg_stress,
-                        "pl_stress": pl_stress,
-                        "accent_type": "accent2" if sg_has_secondary else "accent1"
-                    })
-                
-            elif not sg_has_secondary and pl_has_secondary:
-                patterns["shifting_polysyllabic"].append({
+            elif data["lemma"].endswith(('ium', 'eum')):
+                # Latin -ium/-eum nouns
+                patterns["um"].append({
                     "lexeme": key,
                     "word": ind_sg['form'],
                     "sg_stress": sg_stress,
                     "pl_stress": pl_stress,
-                    "sg_has_secondary": sg_has_secondary,
-                    "pl_has_secondary": pl_has_secondary
+                    "def_sg": forms.get('DEF_SG', {}).get('form'),
+                    "ind_pl": forms.get('IND_PL', {}).get('form'),
+                    "word_syllables": ind_sg.get('syllables'),
+                    "def_sg_syllables": forms.get('DEF_SG', {}).get('syllables'),
+                    "ind_pl_syllables": forms.get('IND_PL', {}).get('syllables'),
+                })
+
+            elif data["lemma"].endswith("ik"):
+                # Latin -ik nouns
+                patterns["ik"].append({
+                    "lexeme": key,
+                    "word": ind_sg['form'],
+                    "sg_stress": sg_stress,
+                    "pl_stress": pl_stress,
+                    "def_sg": forms.get('DEF_SG', {}).get('form'),
+                    "ind_pl": forms.get('IND_PL', {}).get('form'),
+                    "word_syllables": ind_sg.get('syllables'),
+                    "def_sg_syllables": forms.get('DEF_SG', {}).get('syllables'),
+                    "ind_pl_syllables": forms.get('IND_PL', {}).get('syllables'),
+                })
+                
+            elif not sg_has_secondary and pl_has_secondary:
+                patterns["acute_to_grave"].append({
+                    "lexeme": key,
+                    "word": ind_sg['form'],
+                    "sg_stress": sg_stress,
+                    "pl_stress": pl_stress,
                 })
 
             else:
@@ -194,63 +181,73 @@ def analyze_accent_patterns():
                     "word": ind_sg['form'],
                     "sg_stress": sg_stress,
                     "pl_stress": pl_stress,
-                    "sg_has_secondary": sg_has_secondary,
-                    "pl_has_secondary": pl_has_secondary
+                    "def_sg": forms.get('DEF_SG', {}).get('form'),
+                    "ind_pl": forms.get('IND_PL', {}).get('form'),
+                    "word_syllables": ind_sg.get('syllables'),
+                    "def_sg_syllables": forms.get('DEF_SG', {}).get('syllables'),
+                    "ind_pl_syllables": forms.get('IND_PL', {}).get('syllables'),
                 })
 
         # Print summary
         print(f"=== Swedish Noun Accent Analysis ===\n")
 
-        print(f"Stable polysyllabic: {len(patterns['stable_polysyllabic'])}")
+        print(f"Stable polysyllabic: {stable_polysyllabic_count}")
         print(
-            f"Shifting polysyllabic: {len(patterns['shifting_polysyllabic'])}")
+            f"Hidden accent monosyllabic: {hidden_grave_accent_count}\n")
         print(
-            f"Hidden accent monosyllabic: {len(patterns['hidden_accent_monosyllabic'])}")
+            f"Acute to grave: {len(patterns['acute_to_grave'])}")
         print(f"Simple monosyllabic: {len(patterns['simple_monosyllabic'])}")
         print(f"-tor/-sor nouns: {len(patterns['tor_sor'])}")
-        print(f"-ium nouns: {len(patterns['ium'])}")
+        print(f"-um nouns: {len(patterns['um'])}")
         print(f"Suspicious: {len(patterns['suspicious'])}\n")
 
         # Show examples
-        print("=== Hidden Accent Examples (Monosyllabic → Accent 2) ===")
-        for ex in patterns['hidden_accent_monosyllabic'][:10]:
-            print(
-                f"  {ex['word']} (SG: {ex['sg_stress']}) → {ex['pl_word']} (PL: {ex['pl_stress']})")
-            
-        print("\n=== Simple Monosyllabic Examples ===")
-        for ex in patterns['simple_monosyllabic'][:10]:
-            print(
-                f"  {ex['word']} (SG: {ex['sg_stress']}) → PL: {ex['pl_word']} {ex['pl_stress']}")
-
         print("\n=== -tor/-sor Pattern Examples ===")
         for ex in patterns['tor_sor'][:10]:
             print(
                 f"  {ex['word']} (SG: {ex['sg_stress']}) → PL: {ex['pl_stress']}")
+        print({f"{ex['sg_stress']} → {ex['pl_stress']}" for ex in patterns['tor_sor']})
 
-        print("\n=== -ium Pattern Examples ===")
-        for ex in patterns['ium'][:10]:
+        print("\n=== -um Pattern Examples ===")
+        for ex in patterns['um'][:10]:
             print(
                 f"  {ex['word']} (SG: {ex['sg_stress']}) → PL: {ex['pl_stress']}")
-            
-        print("\n=== Stable Polysyllabic Examples ===")
-        for ex in patterns['stable_polysyllabic'][20:30]:
+        print({f"{ex['sg_stress']} → {ex['pl_stress']}" for ex in patterns['um']})
+
+        print("\n=== -ik Pattern Examples ===")
+        for ex in patterns['ik'][:10]:
+            print(
+                f"  {ex['word']} (SG: {ex['sg_stress']}) → PL: {ex['pl_stress']}")
+        print({f"{ex['sg_stress']} → {ex['pl_stress']}" for ex in patterns['ik']})
+
+        print("\n=== Simple Monosyllabic Pattern Examples ===")
+        for ex in patterns['simple_monosyllabic'][:10]:
             print(
                 f"  {ex['word']} (SG: {ex['sg_stress']}) → PL: {ex['pl_stress']}")
 
-        print("\n=== Shifting Stress in Plural Examples ===")
-        for ex in patterns['shifting_polysyllabic'][:10]:
+        print("\n=== Polysyllabic Acute → Grave Examples ===")
+        for ex in patterns['acute_to_grave'][:10]:
             print(
                 f"  {ex['word']} (SG: {ex['sg_stress']}) → PL: {ex['pl_stress']}")
-
+        print(
+            {f"{ex['sg_stress']} → {ex['pl_stress']}" for ex in patterns['acute_to_grave']})
+        
         print(f"\n=== Suspicious Cases ===")
-        for ex in patterns['suspicious'][:10]:
+        for ex in patterns['suspicious']:
             print(
                 f"  {ex['lexeme']}: (SG: {ex['sg_stress']}, PL: {ex['pl_stress']})")
+
+        # print(len(mono_null_plurals))
+        # print(sorted(x for x in mono_null_plurals))
+
+        for ex in patterns['hidden_grave_accent']:
+            print(f"| <ShowTones w=\"{ex['word_syllables']}\" /> <AudioButton word=\"{ex['word']}\" /> |"
+                  f" <ShowTones w=\"{ex['def_sg_syllables']}\" /> <AudioButton word=\"{ex['def_sg']}\" /> |"
+                  f" <ShowTones w=\"{ex['ind_pl_syllables']}\" /> <AudioButton word=\"{ex['ind_pl']}\" /> |")
 
         return patterns
             
             
 
 if __name__ == "__main__":
-    # analyze()
     analyze_accent_patterns()

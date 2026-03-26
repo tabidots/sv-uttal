@@ -30,7 +30,7 @@ SLOT_TO_MORPH = {
 }
 
 
-def morph_matches_slot(morph, slot, gender):
+def morph_matches_slot(morph, slot, gender=None):
     if not slot or slot not in SLOT_TO_MORPH:
         return True  # non-noun slots, pass through
     required = SLOT_TO_MORPH[slot]
@@ -67,7 +67,7 @@ def main():
                 str(braxen_id)
                 for braxen_id, braxen_lemma, morph in braxen_lookup.get((form, pos), [])
                 if lemma in braxen_lemma.split(",")
-                and morph_matches_slot(morph or set(), slot, gender)
+                and morph_matches_slot(morph or set(), slot, gender=gender)
             ]
             
             batch.append(((",".join(matching_ids) or None), wik_id))
@@ -143,6 +143,36 @@ def add_syncretic_ids():
                 AND w1.form = w2.form
         """)
         pl_batch = [(b, i) for i, b in c.fetchall() if b is not None]
+        # Fix DEF_PL syncretism (where DEF_SG = DEF_PL)
+        c.execute("""
+            SELECT w4.id, w2.braxen_ids
+            FROM sv_wiktionary w2
+            JOIN sv_wiktionary w4 ON w4.lemma = w2.lemma
+                AND w4.pos = w2.pos
+                AND w4.which_lexeme = w2.which_lexeme
+            WHERE w2.braxen_ids NOT LIKE '%,%'
+                AND w4.braxen_ids IS NULL
+                AND w2.form = w4.form
+                AND w2.slot = 'DEF_SG'
+                AND w4.slot = 'DEF_PL'
+        """)
+        pl_batch += [(b, i) for i, b in c.fetchall() if b is not None]
+
+        # Fix DEF_SG syncretism (where IND_SG = DEF_SG)
+        c.execute("""
+            SELECT w2.id, w1.braxen_ids
+            FROM sv_wiktionary w1
+            JOIN sv_wiktionary w2 ON w2.lemma = w1.lemma
+                AND w2.pos = w1.pos
+                AND w2.which_lexeme = w1.which_lexeme
+            WHERE w1.braxen_ids NOT LIKE '%,%'
+                AND w2.braxen_ids IS NULL
+                AND w1.form = w2.form
+                AND w1.slot = 'IND_SG'
+                AND w2.slot = 'DEF_SG'
+        """)
+        pl_batch += [(b, i) for i, b in c.fetchall() if b is not None]
+
         c.executemany(
             "UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", pl_batch)
         
@@ -175,6 +205,21 @@ def resolve_ambiguous():
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
         c2 = conn.cursor()
+
+        c.execute("""
+            SELECT b.id, w.lemma
+            FROM sv_wiktionary w
+                LEFT JOIN
+                braxen b ON CAST (w.braxen_ids AS INTEGER) = b.id AND
+                            w.pos = b.pos
+            WHERE w.braxen_ids NOT LIKE '%,%' AND b.lemma LIKE '%,%'
+        """)
+        batch = [(lemma, b_id) for b_id, lemma in c.fetchall()]
+        c.executemany("""
+            UPDATE braxen SET lemma = ?
+            WHERE id = ?
+        """, batch)
+        conn.commit()
 
         # Amibiguous definite plural nouns
         c.execute("""
@@ -211,7 +256,7 @@ def resolve_ambiguous():
         c.executemany("UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", batch)
         conn.commit()
 
-        # Specific ambiguous verbs
+        # Specific ambiguous words
         c.execute("""
             SELECT id, phonetic FROM braxen
             WHERE word = 'köra' AND morph = 'INF AKT'
@@ -222,7 +267,6 @@ def resolve_ambiguous():
                 b_ids_by_phonetic[2] = str(bid)
             else:
                 b_ids_by_phonetic[1] = str(bid)
-
         c.execute("""
             SELECT id, which_lexeme FROM sv_wiktionary 
             WHERE form = 'köra' AND braxen_ids LIKE '%,%'
@@ -230,10 +274,55 @@ def resolve_ambiguous():
         for wik_id, which_lexeme in c.fetchall():
             b_id = b_ids_by_phonetic[which_lexeme]
             c.execute("UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", (b_id, wik_id))
+
+        c.execute("""
+            SELECT id, morph, phonetic FROM braxen
+            WHERE lemma = 'kapris'
+        """)
+        b_ids_by_phonetic = {1: {}, 2: {}}
+        for bid, morph, p in c.fetchall():
+            if "'i:" in p:
+                b_ids_by_phonetic[1][morph] = str(bid)
+            else:
+                b_ids_by_phonetic[2][morph] = str(bid)
+        c.execute("""
+            SELECT id, slot, which_lexeme FROM sv_wiktionary 
+            WHERE lemma = 'kapris'
+        """)
+        for wik_id, slot, which_lexeme in c.fetchall():
+            b_id = None
+            for morph in b_ids_by_phonetic[which_lexeme]:
+                if morph_matches_slot(morph, slot):
+                    b_id = b_ids_by_phonetic[which_lexeme][morph]
+                    break
+            c.execute("UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", (b_id, wik_id))
+
+        c.execute("""
+            SELECT id, morph, phonetic FROM braxen 
+            WHERE word IN ('regel', 'regeln')
+        """)
+        b_ids_by_phonetic = {1: {}, 2: {}}
+        for bid, morph, p in c.fetchall():
+            if "'e:" in p:
+                b_ids_by_phonetic[1][morph] = str(bid)
+            else:
+                b_ids_by_phonetic[2][morph] = str(bid)
+        c.execute("""
+            SELECT id, slot, which_lexeme FROM sv_wiktionary 
+            WHERE form IN ('regel', 'regeln')
+        """)
+        for wik_id, slot, which_lexeme in c.fetchall():
+            b_id = None
+            for morph in b_ids_by_phonetic[which_lexeme]:
+                if morph_matches_slot(morph, slot):
+                    b_id = b_ids_by_phonetic[which_lexeme][morph]
+                    break
+            c.execute("UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", (b_id, wik_id))
+        
         conn.commit()
         
         
 if __name__ == "__main__":
-    main()
-    add_syncretic_ids()
+    # main()
+    # add_syncretic_ids()
     resolve_ambiguous()

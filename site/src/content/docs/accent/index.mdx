@@ -1,6 +1,33 @@
 ---
 title: Introduction
-description: Swedish pitch accent
+description: Surprising behavior in Swedish pitch accent
 ---
 
-Under construction.
+import { Aside } from '@astrojs/starlight/components';
+import ShowTones from '../../../components/ShowTones.astro';
+
+[Pitch accent](https://en.wikipedia.org/wiki/Pitch-accent_language) (🇸🇪 *tonaccent*) is a feature of Swedish that is quite uncommon among Indo-European languages, and it is something that is generally difficult to acquire without a great deal of immersion in the language. However, because pronouncing a word's pitch accent incorrectly in a pitch-accent language has much less impact on how easily you will be understood by native speakers in comparison to pronouncing a word with the wrong tone in a fully tonal language (like Chinese), most learners are told not to worry about it too much in the beginning.
+
+This is probably fine for a pitch-accent language like Japanese, where the accent differences are harder to hear explicitly and largely acquired through immersion anyway, but in Swedish, the pitch accent is probably the most characteristic ingredient in the overall "sing-songy" sound of the language. It is certainly not necessary to aim to sound 100% like a native speaker, but developing an awareness of the accent system early on will go a long way toward making your Swedish sound natural and fluent.
+
+This guide was inspired by a somewhat similar presentation about pitch accent in Norwegian. However, while that presentation intended to outline a comprehensive strategy to guess the accent of an unfamiliar word, this guide focuses on the tendencies and exceptions regarding how pitch accent changes *among* inflected forms of the same word (e.g., *lördag / lördagen / lördagar*), because while dictionaries do specify the pitch accent for the dictionary form of words, they do not specify it for any inflected forms.
+
+## Accent, stress, and dialect
+
+- In this guide, **accent** refers to the *category* of a word's pitch accent. It can be **acute** (also called *accent 1* in some resources) or **grave** (also called *accent 2*). This guide will stick to *acute* and *grave.*
+- As in English, a syllable that carries **stress** is spoken with more force than the others. In Swedish, a word with a grave accent has a secondary stress on a later syllable, and it is this syllable that carries the distinctive tonal fall (marked ↘ in this guide).
+- This guide only covers Standard Swedish (*rikssvenska*). It should be noted that the two accents can be pronounced differently, and words can even be assigned the opposite accent (acute vs. grave), depending on the dialect.
+
+## Notation
+
+Given the differences among dialects, the conventional notation in Swedish dictionaries only makes a distinction between the two accent types. This is tidy and minimal, but not necessarily visually intuitive. Since syllables with secondary stress are pronounced with a distinctive sharp rise and fall in Standard Swedish (*rikssvenska*), this guide will use the following notation:
+
+- ↗ above a vowel with primary stress
+- ↘ above a vowel with secondary stress
+- No arrow for monosyllabic words
+
+Examples: <ShowTones w="språk" />, <ShowTones w="v↗änner" />, <ShowTones w="rak↗et" />, <ShowTones w="m↗ån↘ad" />
+
+<Aside type="note">
+The definite plural will always have the same accent as the indefinite plural, so it is generally omitted in the following tables.
+</Aside>

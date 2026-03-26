@@ -27,6 +27,20 @@ NORMALIZED_POS = {
     "VB": "verb",
 }
 
+PHONETIC_CORRECTIONS = {
+    "Andra Timotheosbrevet": "a n . d r ,a | t i . m oh . t 'e: . u s - b r ,e: . v ex t",
+    "neofascism": "n eh . u . f a . rs 'i s m",
+    "kreationister": "k r e: . a . x u . n 'i . s t ex r",
+    "överlevnadschans": '"ö: . v ex r - l e: v . n a d s - c ,a n s',
+    "operatorer": "u . p eh . r a . t 'u: . r ex r",
+    "mogul": "m o: . g 'uu l",
+    "mambor": "m 'a m . b u r",
+    "kejsarinnor": 'c ä j . s a . r "i . n ,u r',
+    "kejsarinnorna": 'c ä j . s a . r "i . n ,u . rn a',
+    "frikativa": 'f r "i . k a . t ,i: . v a',
+    "frikativan": 'f r "i . k a . t ,i: . v a n'
+}
+
 def main():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -68,29 +82,24 @@ def main():
             pos = NORMALIZED_POS[pos]
 
             # Exceptions and corrections
-            if word == "ön":
-                morph = morph.replace("SIN", "PLU")
-            if word == "scharlakan":
-                morph = morph.replace("UTR", "NEU")
             if word == "Kirgizistan" and phonetic == "k i r . g i . s t 'a: n":
                 continue
             if word == "Makedonien" and phonetic == "m a d . k eh . d 'u: . n ih . ex n":
                 continue
-            if word == "Andra Timotheosbrevet":
-                phonetic = '"a n . d r ,a | t i . m oh . t "e: . u s - b r ,e: . v ex t'
-            if word == "neofascism":
-                phonetic = "n eh . u . f a . rs 'i s m"
-            if word == "kreationister":
-                phonetic = "k r e: . a . x u . n 'i . s t ex r"
-            if word == "överlevnadschans":
-                phonetic = '"ö: . v ex r - l e: v . n a d s - c ,a n s'
+            for w, p in PHONETIC_CORRECTIONS.items():
+                if word == w:
+                    phonetic = p
+                    break
+
+            if word == "ön":
+                morph = morph.replace("SIN", "PLU")
+            if word == "scharlakan":
+                morph = morph.replace("UTR", "NEU")
             if word == "manskör":
                 pos = "noun"
                 morph = "UTR SIN IND NOM"
             if word == "akvarierna":
                 morph = "NEU PLU DEF NOM"
-            if word == "operatorer":
-                phonetic = "u . p eh . r a . t 'u: . r ex r"
             if "f uu ng . k . x ,u: n" in phonetic:
                 phonetic = phonetic.replace("f uu ng . k . x ,u: n", "f uu n g k . x ,u: n")
             
