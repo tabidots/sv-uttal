@@ -28,6 +28,7 @@ PHONEME_TO_GRAPHEME = {
     'dj': r'dge?|ge|dj|j',
     'g': r'g+',
     'f': r'ph|[uv]|f+',
+    'p': r'p+|b',
 }
 
 CONS_CLUSTERS_SHIFT_LEFT = {"ck"}
@@ -103,8 +104,10 @@ def process_entry(word: str, phonetic: str, lemma: str) -> tuple[str, str, list[
         else:
             # Use lookakead to find overlapping matches
             pattern = fr'(?=({PHONEME_TO_GRAPHEME.get(initial, initial)}))'
-            candidates = re.finditer(pattern, lower_word)
+            candidates = [c for c in re.finditer(pattern, lower_word)]
             winner = next((c.start(1) for c in candidates if c.start(1) > last_final), None)
+            if winner is None:  # back up by one grapheme for words like fram|mana
+                winner = next((c.start(1) for c in candidates if c.start(1) == last_final), None)
         
         if winner is None:
             raise ValueError(
@@ -279,12 +282,14 @@ def process_entry(word: str, phonetic: str, lemma: str) -> tuple[str, str, list[
     for i, (syl, b) in enumerate(zip(syllables[:], boundaries)):
         if not b or b == ".":
             b = ""
+        elif syl.endswith(" "):
+            b = " "
         else:
             b = "|"
         if not syl:
             continue
 
-        syl = syl.strip("-")
+        syl = syl.strip("- ")
         if len(syllables) == 1:
             syllables[i] = syl
             break

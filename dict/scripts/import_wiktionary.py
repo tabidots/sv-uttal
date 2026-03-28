@@ -121,11 +121,15 @@ def main():
                     continue
                 
                 slot = get_slot(pos, tagset)
-                if slot is None:
+                if pos == "verb" and 'participle' in tagset:
+                    slot = 'PRS_PART' if 'present' in tagset else 'PRT_PART'
+                    batch.append((word, 'participle', gender, which_lexeme, form, slot))
+                    continue
+                elif slot is None:
                     continue
                 batch.append((word, pos, gender, which_lexeme, form, slot))
             
-            if pos not in {"verb", "adj", "noun"} or not data.get("forms"):
+            if pos not in {"verb", "adj", "noun", "participle"} or not data.get("forms"):
                 batch.append((word, pos, gender, which_lexeme, word, None))
             
             if len(batch) == 1000:

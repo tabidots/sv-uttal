@@ -27,6 +27,9 @@ SLOT_TO_MORPH = {
     'PRT_PASS': ('PRT', 'SFO'),
     'SUP_PASS': ('SUP', 'SFO'),
     'IMP_PASS': ('IMP', 'SFO'),
+    # participles
+    'PRS_PART': ('PRS',),
+    'PRT_PART': ('PRF', 'UTR', 'SIN', 'IND', 'NOM'),
 }
 
 
@@ -69,7 +72,7 @@ def main():
                 if lemma in braxen_lemma.split(",")
                 and morph_matches_slot(morph or set(), slot, gender=gender)
             ]
-            
+
             batch.append(((",".join(matching_ids) or None), wik_id))
 
         c.executemany(
@@ -77,7 +80,81 @@ def main():
         conn.commit()
 
 
-def add_syncretic_ids():
+def add_phrasal_verbs_to_braxen():
+    """Supplement missing phonetic data in Braxen for phrasal verbs."""
+
+    with sqlite3.connect(DB_PATH) as conn:
+        c = conn.cursor()
+        c.execute("""
+            SELECT form FROM sv_wiktionary
+            WHERE lemma LIKE '% %' AND form LIKE '% %' AND pos = 'verb';
+        """)
+        parts = {part for (form,) in c.fetchall() for part in form.split()}
+        c.execute("""
+            CREATE TEMP TABLE IF NOT EXISTS tmp_verb_parts (
+                part TEXT NOT NULL,
+                phonetic TEXT,
+                syllables TEXT,
+                stress TEXT
+            )
+        """)
+        c.executemany("""
+            INSERT INTO tmp_verb_parts (part) VALUES (?);
+        """, [(part,) for part in parts])
+        c.execute("""
+            UPDATE tmp_verb_parts
+            SET phonetic = b.phonetic,
+                syllables = b.syllables,
+                stress = b.stress
+            FROM braxen b
+            WHERE b.word = tmp_verb_parts.part;
+        """)
+
+        c.execute("SELECT part, phonetic, syllables, stress FROM tmp_verb_parts")
+        parts_lookup = {
+            part: {
+                "phonetic": phonetic,
+                "syllables": syllables,
+                "stress": stress
+            }
+            for part, phonetic, syllables, stress in c.fetchall()
+        }
+        c.execute("""
+            SELECT lemma, form FROM sv_wiktionary
+            WHERE lemma LIKE '% %' AND pos = 'verb';
+        """)
+        batch = []
+        for (lemma, form) in c.fetchall():
+            parts = form.split()
+            try:
+                phonetic = " | ".join(
+                    parts_lookup[part]["phonetic"] for part in parts)
+                syllables = " ".join(
+                    parts_lookup[part]["syllables"] for part in parts)
+                stress = parts_lookup[parts[0]]["stress"]
+            except TypeError, KeyError:
+                continue
+            batch.append((lemma, form, 'verb', phonetic, syllables, stress))
+
+        c.executemany("""
+            INSERT INTO braxen (lemma, word, pos, phonetic, syllables, stress)
+            VALUES (?, ?, ?, ?, ?, ?);
+        """, batch)
+        conn.commit()
+
+        c.execute("""
+            UPDATE sv_wiktionary
+            SET braxen_ids = CAST(b.id AS TEXT)
+            FROM braxen b
+            WHERE b.word = sv_wiktionary.form
+                AND b.pos = 'verb'
+                AND sv_wiktionary.form LIKE '% %'
+                AND sv_wiktionary.pos = 'verb';
+        """)
+        conn.commit()
+
+
+def fill_in_missing_braxen_ids():
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
 
@@ -197,7 +274,18 @@ def add_syncretic_ids():
         adj_batch = [(b, i) for b, i in adj_batch if b is not None]
         c.executemany(
             "UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", adj_batch)
-
+        conn.commit()
+        
+        # Supplement participles with any word matching the form, regardless of POS
+        c.execute("""
+            UPDATE sv_wiktionary
+            SET braxen_ids = CAST(b.id AS TEXT)
+            FROM braxen b
+            WHERE b.word = sv_wiktionary.form
+                AND sv_wiktionary.pos = 'participle'
+                AND sv_wiktionary.braxen_ids IS NULL
+        """)
+        
         conn.commit()
 
 
@@ -324,5 +412,6 @@ def resolve_ambiguous():
         
 if __name__ == "__main__":
     # main()
-    # add_syncretic_ids()
+    # add_phrasal_verbs_to_braxen()
+    # fill_in_missing_braxen_ids()
     resolve_ambiguous()

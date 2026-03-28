@@ -10,11 +10,7 @@ def count_syllables(phonetic: str) -> int:
     return phonetic.count('.') + phonetic.count('-') + phonetic.count('~') + 1
 
 
-def is_umlaut_plural(sg: str, pl: str) -> bool:
-    return pl.count("ä") > sg.count("ä") or pl.count("ö") > sg.count("ö")
-
-
-def analyze_accent_patterns():
+def analyze_accent_patterns_nouns():
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
 
@@ -247,7 +243,147 @@ def analyze_accent_patterns():
 
         return patterns
             
+
+def analyze_accent_patterns_verbs():
+    with sqlite3.connect(DB_PATH) as conn:
+        c = conn.cursor()
+
+        lexemes = {}
+
+        c.execute("""
+            SELECT w.lemma, w.which_lexeme, w.form, w.slot, b.phonetic, b.syllables, b.stress 
+            FROM sv_wiktionary w
+            JOIN braxen b ON CAST(w.braxen_ids AS INTEGER) = b.id
+            WHERE w.braxen_ids NOT LIKE '%,%'
+              AND w.lemma NOT LIKE '% %'
+              AND w.pos IN ('verb', 'participle')
+            -- AND b.syllables not like '%|%'
+            AND w.lemma like '%hålla'
+            ORDER BY RANDOM() -- w.lemma
+        """)
+        for lemma, which_lexeme, form, slot, phonetic, syllables, stress in c.fetchall():
+            key = f"{lemma}_{which_lexeme}" if which_lexeme else lemma
+
+            lexemes.setdefault(key, {
+                "lemma": lemma,
+                "which_lexeme": which_lexeme,
+                "forms": {},
+                "stress_patterns": {}
+            })
+
+            lexemes[key]["forms"][slot] = {
+                "form": form,
+                "syllables": syllables,
+                "is_monosyllable": count_syllables(phonetic) == 1,
+                "num_syllables": count_syllables(phonetic),
+                "stress": stress,
+                "phonetic": phonetic
+            }
+
+        # Now analyze each lexeme
+        patterns = {
+            "stable_grave": [],
+            "stable_grave_polysyllabic": [],
+            "stable_acute": [],
+            "hidden_grave_accent": [],
+            "present_acute": [],
+        }
+
+        for key, data in lexemes.items():
+            forms = data["forms"]
             
+            infin = forms.get("INF")  # 3531 verbs
+            p_slug = ""
+            if not infin:  # 159 verbs
+                infin = forms.get("INF_PASS")
+                p_slug = "_PASS"
+            if not infin:  # 82 errors - not merged in DB
+                continue
+
+            present = forms.get(f"PRS{p_slug}")
+            past = forms.get(f"PRT{p_slug}")
+            supine = forms.get(f"SUP{p_slug}")
+            pres_part = forms.get(f"PRS_PART", {"syllables": "_"})
+            past_part = forms.get(f"PRT_PART", {"syllables": "_"})
+
+            # 103 missing past, 87 missing present, 119 missing supine
+            if not present or not past or not supine:
+                continue
+
+            if not present["form"].endswith("ar") and not present["form"].endswith("ar"):
+                continue
+            if present["form"].endswith("erar") or present["form"].endswith("eras"):
+                continue
+            if present["form"].startswith("be") or present["form"].startswith("för"):
+                continue
+            if present["is_monosyllable"]:
+                continue
+
+            payload = {
+                "word": key,
+                "infin": infin["syllables"],
+                "present": present["syllables"],
+                "past": past["syllables"],
+                "supine": supine["syllables"],
+                "pres_part": pres_part["syllables"],
+                "past_part": past_part["syllables"],
+            }
+
+            stable_stress = True
+            for _, v in forms.items():
+                if not v.get("stress"):
+                    continue
+                if v["stress"] != infin["stress"]:
+                    stable_stress = False
+            
+            if stable_stress:
+                if "-" in infin["stress"]:
+                    patterns["stable_grave"].append(payload)
+                    if infin["num_syllables"] > 2 and "|" not in infin["syllables"]:
+                        patterns["stable_grave_polysyllabic"].append(payload)
+                else:
+                    patterns["stable_acute"].append(payload)
+        
+            elif present["is_monosyllable"]:
+                patterns["hidden_grave_accent"].append(payload)
+            elif present["stress"] == "0":
+                patterns["present_acute"].append(payload)
+            else:
+                patterns["stable_grave"].append(payload)
+
+        print(f"\n=== Stable Grave Cases ({len(patterns['stable_grave'])}) ===")
+        for ex in patterns['stable_grave'][:30]:
+            print(ex['infin'], ex['present'], ex['past'], 
+                  ex['supine'], ex['pres_part'], ex['past_part'], sep="\t")
+            
+        print(f"\n=== Stable Acute Cases ({len(patterns['stable_acute'])}) ===")
+        for ex in patterns['stable_acute'][:10]:
+            print(ex['infin'], ex['present'], ex['past'], 
+                  ex['supine'], ex['pres_part'], ex['past_part'], sep="\t")
+        print(', '.join(
+            sorted([ex['present'].replace("↗", "").replace("↘", "") for ex in patterns['stable_acute']])
+        ))
+
+        print(f"\n=== Hidden Grave Accent Cases ({len(patterns['hidden_grave_accent'])}) ===")
+        for ex in patterns['hidden_grave_accent']:
+            print(ex['infin'], ex['present'], ex['past'],
+                  ex['supine'], ex['pres_part'], ex['past_part'], sep="\t")
+        print(', '.join(
+            sorted([ex['present'].replace("↗", "").replace("↘", "") for ex in patterns['hidden_grave_accent']])))
+        
+        print(f"\n=== Present Acute Cases ({len(patterns['present_acute'])}) ===")
+        for ex in patterns['present_acute'][:10]:
+            print(ex['infin'], ex['present'], ex['past'],
+                  ex['supine'], ex['pres_part'], ex['past_part'], sep="\t")
+        print(', '.join(
+            sorted([ex['present'].replace("↗", "").replace("↘", "") for ex in patterns['present_acute']])))
+            
+        # print(f"\n=== Stable Grave Polysyllabic Cases ({len(patterns['stable_grave_polysyllabic'])}) ===")
+        # for ex in sorted(patterns['stable_grave_polysyllabic'], key=lambda x: x['infin']):
+        #     print(ex['infin'], ex['present'], ex['past'],
+        #           ex['supine'], ex['pres_part'], ex['past_part'], sep="\t")
+        
 
 if __name__ == "__main__":
-    analyze_accent_patterns()
+    # analyze_accent_patterns_nouns()
+    analyze_accent_patterns_verbs()

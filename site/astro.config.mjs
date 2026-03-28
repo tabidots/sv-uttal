@@ -33,6 +33,7 @@ export default defineConfig({
 					items: [
 						{ label: 'Introduction', slug: 'accent' },
 						{ label: 'Nouns', slug: 'accent/nouns' },
+						{ label: 'Verbs', slug: 'accent/verbs' },
 					],
 				},
 			],

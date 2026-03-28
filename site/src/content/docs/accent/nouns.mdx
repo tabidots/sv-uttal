@@ -4,7 +4,6 @@ description: Swedish pitch accent
 ---
 
 import { Aside } from '@astrojs/starlight/components';
-import Mark from '../../../components/Mark.astro';
 import AudioButton from '../../../components/AudioButton.astro';
 import ShowTones from '../../../components/ShowTones.astro';
 
@@ -13,6 +12,10 @@ This analysis is the result of examining 8186 distinct non-compound noun lexemes
 - compound nouns
 - nouns that did not have a plural form
 - most lexemes that included one or more ambiguous wordforms
+
+<Aside type="note">
+The definite plural will always have the same accent as the indefinite plural, so there is no column for it in the following tables.
+</Aside>
 
 ## Tendencies
 
@@ -120,7 +123,7 @@ The grave accent shifts to acute in the plural, but the primary stressed syllabl
 | <ShowTones w="prof↗ess↘or" /> <AudioButton word="professor" /> | <ShowTones w="prof↗ess↘orn" /> <AudioButton word="professorn" /> | <ShowTones w="profess↗orer" /> <AudioButton word="professorer" /> |
 
 <details>
-  <summary>All nouns in -tor/-sor (81)</summary>
+  <summary>All nouns in *-tor/-sor* (81)</summary>
   accelerator, ackumulator, agitator, alligator, arrendator, assessor, censor, dator, destillator, detektor, diktator, doktor, donator, elektor, elevator, emulator, emulgator, faktor, funktor, generator, gladiator, indikator, informator, inhalator, inkvisitor, inspektor, interpretator, isolator, kalfaktor, kalkylator, kantor, karburator, katalysator, kiropraktor, kommentator, kommutator, kompilator, komprimator, kondensator, konditor, koordinator, kurator, lektor, liktor, mentor, moderator, motor, operator, orator, pastor, perkolator, plagiator, pretor, professor, projektor, radiator, reaktor, reformator, registrator, rektor, resistor, respirator, revisor, rollator, rullator, sektor, senator, sensor, separator, sponsor, stabilisator, tensor, termistor, traktor, transformator, transistor, triumfator, tyristor, usurpator, vektor, vibrator
 </details>
 

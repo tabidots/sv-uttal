@@ -15,7 +15,7 @@ NORMALIZED_POS = {
     "JJ": "adj",
     "KN": "conj",
     "NN": "noun",
-    "PC": "verb", # verb or adj (participle)
+    "PC": "participle",
     "PL": "adv",
     "PM": "name",
     "PN": "pron",
@@ -38,7 +38,10 @@ PHONETIC_CORRECTIONS = {
     "kejsarinnor": 'c ä j . s a . r "i . n ,u r',
     "kejsarinnorna": 'c ä j . s a . r "i . n ,u . rn a',
     "frikativa": 'f r "i . k a . t ,i: . v a',
-    "frikativan": 'f r "i . k a . t ,i: . v a n'
+    "frikativan": 'f r "i . k a . t ,i: . v a n',
+    "försiggås": 'f "oe: ~ rs i - g ,o: s',
+    "försiggick": 'f "oe: ~ rs i - j ,i k',
+    "beredes": "b eh . r 'e: . d ex s",
 }
 
 def main():
@@ -100,6 +103,9 @@ def main():
                 morph = "UTR SIN IND NOM"
             if word == "akvarierna":
                 morph = "NEU PLU DEF NOM"
+            if word == "minnes":
+                pos = "verb"
+                morph = "PRS SFO"
             if "f uu ng . k . x ,u: n" in phonetic:
                 phonetic = phonetic.replace("f uu ng . k . x ,u: n", "f uu n g k . x ,u: n")
             
@@ -121,7 +127,7 @@ def add_lemmas():
         c = conn.cursor()
         c.execute("""
             SELECT id, pos, morph, word FROM braxen 
-            WHERE pos IN ('noun', 'verb', 'adj')
+            WHERE pos IN ('noun', 'verb', 'adj', 'participle')
         """)
 
         batch = []
@@ -138,9 +144,10 @@ def add_lemmas():
                 batch.append((word, id))
                 continue
 
-            if any(c.isdigit() for c in word):
-                continue
             lemma = []
+            if pos == "participle":
+                pos = "verb"
+
             if "-" in word:
                 static_parts = word[:word.rfind("-") + 1]
                 inflecting_part = word[word.rfind("-") + 1:]
@@ -151,7 +158,7 @@ def add_lemmas():
 
             if not is_base_form and len(lemma) > 1:
                 lemma = [l for l in lemma if l != word]
-            
+
             lemma = ",".join(lemma)
             batch.append((lemma, id))
             
@@ -165,7 +172,7 @@ def add_lemmas():
             conn.commit()
         
         c.execute("""
-            UPDATE braxen SET lemma = word WHERE pos NOT IN ('noun', 'verb', 'adj');
+            UPDATE braxen SET lemma = word WHERE pos NOT IN ('noun', 'verb', 'adj', 'participle');
         """)
 
         c.execute("""
@@ -174,8 +181,9 @@ def add_lemmas():
         conn.commit()
 
         c.execute("CREATE INDEX IF NOT EXISTS braxen_lemma_idx ON braxen (lemma);")
+        c.execute("CREATE INDEX IF NOT EXISTS braxen_word_idx ON braxen (word);")
             
 
 if __name__ == "__main__":
-    # main()
+    main()
     add_lemmas()
