@@ -6,3 +6,78 @@ description: Swedish pitch accent
 import { Aside } from '@astrojs/starlight/components';
 import AudioButton from '../../../components/AudioButton.astro';
 import ShowTones from '../../../components/ShowTones.astro';
+
+This analysis is the result of examining approximately 5000 distinct adjective lexemes in Wiktionary using pronunciation data from the Braxen dataset.
+
+<Aside type="note">
+This analysis only covers regular adjectives. Since irregular adjectives have forms that are derived from completely different words, and there are very few such adjectives, there is no real need to cover them here.
+</Aside>
+
+## Monosyllabic adjectives: "Hidden" grave accent
+
+All *regular* adjectives whose dictionary form (common-gender singular) is monosyllabic have a *"hidden" grave accent.* In the plural (as well as comparative and superlative forms), the word takes on a grave accent. There are 277 of these.
+
+| base | plural | comp. | sup. (def.) |
+| --- | --- | --- | --- |
+| grön | <ShowTones w="gr↗ön↘a" /> | <ShowTones w="gr↗ön↘are" /> | <ShowTones w="gr↗ön↘ast(e)" /> |
+| jämn | <ShowTones w="j↗ämn↘a" /> | <ShowTones w="j↗ämn↘are" /> | <ShowTones w="j↗ämn↘ast(e)" /> |
+
+There is just one exception, and it is not a common word:
+
+| base | plural | comp. | sup. |
+| --- | --- | --- | --- |
+| trilsk | <ShowTones w="tr↗ilska" /> | <ShowTones w="tr↗ilskare" /> | <ShowTones w="tr↗ilskast(e)" /> |
+
+<details>
+  <summary>Complete list (277)</summary>
+  arg, ball, barsk, besk, bitsk, bjärt, black, blank, blek, blind, blond, blyg, blöt, boolesk, bred, brun, brydd, brysk, bräckt, bråd, bäng, cool, dansk, ding, djup, djärv, dov, dryg, drömsk, dum, dyr, däst, död, döv, fadd, falsk, fast, feg, fet, fin, finsk, flat, flygg, forn, fransk, fri, frisk, from, fräck, frän, ful, full, färsk, gift, gill, glad, glapp, glupsk, glömsk, god, grann, grav, grov, grund, grym, gräll, grå, grön, gul, gäll, hal, halt, halv, hel, hemsk, het, hipp, huld, hätsk, hård, hög, ilsk, jämn, kal, kall, karg, karsk, kass, klar, klen, klipsk, klok, klädd, knapp, knäpp, kort, krabb, kram, krass, krum, kry, kränkt, kvav, kvick, kysk, känd, kär, kärv, kåt, lam, lat, led, lejd, len, ljum, ljus, ljuv, loj, lugn, lybsk, lyckt, lärd, låg, låst, lömsk, matt, mild, mjuk, mjäll, moj, morsk, mätt, mör, mörk, njugg, norsk, ny, nätt, nöjd, ond, paff, pank, pigg, plan, plump, prompt, pryd, rak, rapp, rar, rask, ren, rik, rund, rysk, rädd, rät, rätt, röd, rökt, sagd, salt, sank, sann, satt, schyst, seg, sen, sipp, sjuk, sjyst, skarp, skev, skir, skotsk, skraj, skral, skum, skygg, skälmsk, skämd, skär, skärpt, skånsk, skön, skör, slak, slank, slapp, slug, slät, slö, smal, smart, smärt, snabb, snar, sned, snygg, snäll, snäv, snål, snöd, soft, spak, spansk, sprängd, spröd, späd, stark, stel, stinn, stolt, stor, stram, strid, strikt, strong, sträng, sträv, ström, stum, stursk, stygg, styv, sund, sur, svag, sval, svart, svensk, svett, svår, synsk, säll, såld, såt, sökt, söt, tajt, tam, tjock, tom, torr, trind, trist, trolsk, trygg, trängd, trång, trög, tuff, tung, tunn, tysk, tyst, tänkt, tät, ung, vag, van, varm, vass, vek, vid, vig, vild, vind, viss, vit, vrång, välvd, värd, vävd, våt, yr, öm
+</details>
+
+## Polysyllabic adjectives: acute to grave
+
+Only 19 adjectives shift from acute to grave between their base form and the other forms. Interestingly, they all end in unstressed *-en, -el, -er*, just like the polysyllabic nouns that shift from acute to grave between singular and plural (*öken, titel, fjäder...*).
+
+All other unprefixed adjectives (916) have a stable pitch accent pattern, whether that be grave or acute.
+
+| base | plural |
+| --- | --- |
+| <ShowTones w="v↗acker" /> | <ShowTones w="v↗ackr↘a" /> |
+| <ShowTones w="n↗ykter" /> | <ShowTones w="n↗yktr↘a" /> |
+| <ShowTones w="↗ädel" /> | <ShowTones w="↗ädl↘a" /> |
+
+<details>
+  <summary>Complete list (19)</summary>
+  bister, butter, dunkel, dyster, enkel, läcker, mager, nobel, nykter, påver, simpel, smäcker, sober, tapper, usel, vacker, vitter, yster, ädel
+</details>
+
+## Prefixed adjectives
+
+The same principles as verbs apply here. All prefixes take away any secondary stress in the root word, and additionally, prefixes other than *be-* and *för-* "steal" that stress. This results in a stable accent pattern across all forms.
+
+<Aside type="note">
+In the tables below, • indicates the boundary between the prefix and the original verb; it is not part of the spelling and has no bearing on pronunciation.
+</Aside>
+
+| base | plural |
+| --- | --- |
+| gift | <ShowTones w="g↗ift↘a" /> | 
+| **<ShowTones w="↗o" />**•<ShowTones w="g↘ift" /> | **<ShowTones w="↗o" />**•<ShowTones w="g↘ifta" /> |
+| <ShowTones w="l↗yckl↘ig" /> | <ShowTones w="l↗yckl↘iga" /> | 
+| **<ShowTones w="↗o" />**•<ShowTones w="l↘ycklig" /> | **<ShowTones w="↗o" />**•<ShowTones w="l↘yckliga" /> |
+| <ShowTones w="n↗ykter" /> | <ShowTones w="n↗yktr↘a" /> | 
+| **<ShowTones w="↗o" />**•<ShowTones w="n↘yckter" /> | **<ShowTones w="↗o" />**•<ShowTones w="n↘ycktra" /> |
+| <ShowTones w="↗ädel" /> | <ShowTones w="↗ädl↘a" /> |
+| **<ShowTones w="↗o" />**•<ShowTones w="↘ädel" /> | **<ShowTones w="↗o" />**•<ShowTones w="↘ädla" /> |
+
+Examples with *be-* and *för-*:
+
+| base | plural |
+| --- | --- |
+| satt | <ShowTones w="s↗att↘a" /> |
+| <ShowTones w="bes↗att" /> | <ShowTones w="bes↗atta" /> |
+| <ShowTones w="st↗änd↘ig" /> | <ShowTones w="st↗änd↘iga" /> |
+| <ShowTones w="best↗ändig" /> | <ShowTones w="best↗ändiga" /> |
+| nöjd | <ShowTones w="n↗öjd↘a" /> |
+| <ShowTones w="förn↗öjd" /> | <ShowTones w="förn↗öjda" /> |
+| <ShowTones w="v↗ux↘en" /> | <ShowTones w="v↗uxn↘a" /> |
+| <ShowTones w="förv↗uxen" /> | <ShowTones w="förv↗uxna" /> |

@@ -26,7 +26,7 @@ ADJ_SLOTS = [
     ({'indefinite', 'positive', 'error-unrecognized-form'}, 'POS_UTR'),
     ({'indefinite', 'neuter', 'positive', 'singular'}, 'POS_NEU'),
     ({'indefinite', 'plural', 'positive'}, 'POS_PL'),
-    ({'definite', 'positive'}, 'POS_DEF'),
+    ({'definite', 'positive'}, 'POS_DEF'), # exceptional
     ({'comparative', 'indefinite', 'plural'}, 'COMP'),
     ({'superlative', 'indefinite', 'plural'}, 'SUPERL_IND'),
     ({'superlative', 'definite'}, 'SUPERL_DEF'),
@@ -126,6 +126,8 @@ def main():
                     batch.append((word, 'participle', gender, which_lexeme, form, slot))
                     continue
                 elif slot is None:
+                    continue
+                elif slot == "POS_DEF" and not form.endswith(("lilla", "blå", "blåa", "grå", "gråa")):
                     continue
                 batch.append((word, pos, gender, which_lexeme, form, slot))
             

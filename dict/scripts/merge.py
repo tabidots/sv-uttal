@@ -285,6 +285,19 @@ def fill_in_missing_braxen_ids():
                 AND sv_wiktionary.pos = 'participle'
                 AND sv_wiktionary.braxen_ids IS NULL
         """)
+
+        # Supplement definite and plural adjectives with any word matching the form and lemma
+        c.execute("""
+            UPDATE sv_wiktionary
+            SET braxen_ids = CAST(b.id AS TEXT)
+            FROM braxen b
+            WHERE b.word = sv_wiktionary.form
+                AND b.lemma = sv_wiktionary.lemma
+                AND sv_wiktionary.slot IN ('POS_DEF', 'POS_PL')
+                AND sv_wiktionary.pos = 'adj'
+                AND b.pos = 'adj'
+                AND sv_wiktionary.braxen_ids IS NULL
+        """)
         
         conn.commit()
 
