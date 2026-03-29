@@ -42,6 +42,7 @@ PHONETIC_CORRECTIONS = {
     "försiggås": 'f "oe: ~ rs i - g ,o: s',
     "försiggick": 'f "oe: ~ rs i - j ,i k',
     "beredes": "b eh . r 'e: . d ex s",
+    "borna": 'b "u: . rn ,a',
 }
 
 def main():
@@ -71,7 +72,7 @@ def main():
                 continue
             if "ﬁ" in word or "ﬂ" in word or "ﬀ" in word:
                 continue
-            if "GEN" in posmorph:
+            if "GEN" in posmorph or "SMS" in posmorph:
                 continue
             if lang != "swe":
                 continue
@@ -89,6 +90,11 @@ def main():
                 continue
             if word == "Makedonien" and phonetic == "m a d . k eh . d 'u: . n ih . ex n":
                 continue
+            if word in {"not", "notar", "notarna", "noten"} and "o" in phonetic:
+                continue
+            if word in {"friser", "friserna"} and "f r 'i: . s" in phonetic:
+                continue
+
             for w, p in PHONETIC_CORRECTIONS.items():
                 if word == w:
                     phonetic = p
@@ -155,6 +161,10 @@ def add_lemmas():
                         lem.lemmatize(pos.upper(), inflecting_part)]
             else:
                 lemma = lem.lemmatize(pos.upper(), word)
+                if word == "poppen" and lemma == "popp":
+                    lemma = "pop"
+                if word in {"kikärta", "kikärtan", "kikärtor", "kikärtorna"}:
+                    lemma = "kikärta"
 
             if not is_base_form and len(lemma) > 1:
                 lemma = [l for l in lemma if l != word]

@@ -37,7 +37,7 @@ def morph_matches_slot(morph, slot, gender=None):
     if not slot or slot not in SLOT_TO_MORPH:
         return True  # non-noun slots, pass through
     required = SLOT_TO_MORPH[slot]
-    if not gender:
+    if not gender or gender == "e":
         return all(r in morph for r in required)
     if gender == "c":
         return all(r in morph for r in required) and "UTR" in morph
@@ -85,6 +85,14 @@ def add_phrasal_verbs_to_braxen():
 
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
+
+        # If this function has already been run, don't run it again
+        c.execute("""
+            SELECT 1 FROM braxen WHERE lemma = 'komma ihåg';
+        """)
+        if c.fetchone():
+            return
+
         c.execute("""
             SELECT form FROM sv_wiktionary
             WHERE lemma LIKE '% %' AND form LIKE '% %' AND pos = 'verb';
@@ -285,6 +293,7 @@ def fill_in_missing_braxen_ids():
                 AND sv_wiktionary.pos = 'participle'
                 AND sv_wiktionary.braxen_ids IS NULL
         """)
+        conn.commit()
 
         # Supplement definite and plural adjectives with any word matching the form and lemma
         c.execute("""
@@ -322,14 +331,16 @@ def resolve_ambiguous():
         """, batch)
         conn.commit()
 
-        # Amibiguous definite plural nouns
+        # Ambiguous definite plural nouns
         c.execute("""
             SELECT w1.id, w1.braxen_ids as ambiguous_ids, b_sg.stress as sg_stress
             FROM sv_wiktionary w1
             JOIN sv_wiktionary w2 ON w2.lemma = w1.lemma 
-                AND w2.pos = w1.pos 
+                AND w2.pos = w1.pos
+                AND w1.pos = 'noun'
                 AND w2.which_lexeme = w1.which_lexeme
-                AND w2.slot = 'IND_SG'
+                AND w2.slot = 'IND_PL'
+                AND w2.form <> w1.form
             JOIN braxen b_sg ON b_sg.id = CAST(w2.braxen_ids AS INTEGER)
             WHERE w1.braxen_ids LIKE '%,%'
         """)
@@ -343,88 +354,323 @@ def resolve_ambiguous():
             """, ids)
             candidates = c2.fetchall()
 
-            # Pick candidate whose stress pattern matches IND_SG
-            # accent 2 IND_SG (0-1) -> prefer DEF_SG with secondary stress
-            # accent 1 IND_SG (0) -> prefer DEF_SG without secondary stress
+            # Pick candidate whose stress pattern matches IND_PL
+            # accent 2 IND_PL (0-1) -> prefer DEF_SG with secondary stress
+            # accent 1 IND_PL (0) -> prefer DEF_SG without secondary stress
             has_secondary = sg_stress and "-" in sg_stress
             match = next(
                 (str(cid) for cid, cstress in candidates
                 if cstress and ("-" in cstress) == has_secondary),
-                ids[0]  # fallback to first if no clear match
+                None
             )
-            batch.append((match, wik_id))
+            if match:
+                batch.append((match, wik_id))
 
         c.executemany("UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", batch)
         conn.commit()
 
-        # Specific ambiguous words
+        # Build IND_SG stress lookup from unambiguous rows
         c.execute("""
-            SELECT id, phonetic FROM braxen
-            WHERE word = 'köra' AND morph = 'INF AKT'
+            SELECT w.lemma, b.stress
+            FROM sv_wiktionary w
+            JOIN braxen b ON b.id = CAST(w.braxen_ids AS INTEGER)
+            WHERE w.slot = 'IND_SG'
+            AND w.braxen_ids NOT LIKE '%,%'
+        """)
+        ind_sg_stress = dict(c.fetchall())  # lemma -> stress
+
+        c.execute("""
+            SELECT id, lemma, braxen_ids FROM sv_wiktionary
+            WHERE braxen_ids LIKE '%,%'
+        """)
+        batch = []
+        for wik_id, wik_lemma, braxen_ids in c.fetchall():
+            ids = braxen_ids.split(",")
+            c2.execute(f"""
+                SELECT id, lemma, stress FROM braxen
+                WHERE id IN ({','.join('?' * len(ids))})
+            """, ids)
+            candidates = c2.fetchall()
+
+            expected_stress = ind_sg_stress.get(wik_lemma)
+            has_secondary = expected_stress and "-" in expected_stress
+
+            match = next(
+                (str(bid) for bid, b_lemma, b_stress in candidates
+                if wik_lemma in (b_lemma or "").split(",")
+                and b_stress and ("-" in b_stress) == has_secondary),
+                None
+            )
+            if match:
+                batch.append((match, wik_id))
+
+        c.executemany("UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", batch)
+        conn.commit()
+
+        # Specific ambiguous cases that aren't originally separate lexemes in Wiktionary
+        c.execute("""
+            SELECT id, word, phonetic FROM braxen 
+            WHERE lemma = 'kanon'
+        """)
+        b_ids_by_phonetic = {0: {}, 1: {}}
+        for bid, word, p in c.fetchall():
+            if "'u:" in p:
+                b_ids_by_phonetic[0][word] = str(bid)
+            else:
+                b_ids_by_phonetic[1][word] = str(bid)
+        c.execute("""
+            SELECT id, form, which_lexeme FROM sv_wiktionary 
+            WHERE lemma = 'kanon'
+        """)
+        for wik_id, form, which_lexeme in c.fetchall():
+            b_id = None
+            for word in b_ids_by_phonetic[which_lexeme]:
+                if form == word:
+                    b_id = b_ids_by_phonetic[which_lexeme][form]
+                    break
+            c.execute(
+                "UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", (b_id, wik_id))
+        conn.commit()
+
+        c.execute("""
+            SELECT id, word, phonetic FROM braxen
+            WHERE (word IN ('nubb', 'nubben') AND phonetic LIKE '%''uu%')
+                  OR word IN ('nubbar', 'nubbarna');
         """)
         b_ids_by_phonetic = {}
-        for bid, p in c.fetchall():
-            if p.startswith("k"):
-                b_ids_by_phonetic[2] = str(bid)
-            else:
-                b_ids_by_phonetic[1] = str(bid)
+        for bid, word, p in c.fetchall():
+            b_ids_by_phonetic[word] = str(bid)
         c.execute("""
-            SELECT id, which_lexeme FROM sv_wiktionary 
-            WHERE form = 'köra' AND braxen_ids LIKE '%,%'
+            SELECT id, form, which_lexeme FROM sv_wiktionary
+            WHERE lemma = 'nubb';
         """)
-        for wik_id, which_lexeme in c.fetchall():
-            b_id = b_ids_by_phonetic[which_lexeme]
-            c.execute("UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", (b_id, wik_id))
-
-        c.execute("""
-            SELECT id, morph, phonetic FROM braxen
-            WHERE lemma = 'kapris'
-        """)
-        b_ids_by_phonetic = {1: {}, 2: {}}
-        for bid, morph, p in c.fetchall():
-            if "'i:" in p:
-                b_ids_by_phonetic[1][morph] = str(bid)
-            else:
-                b_ids_by_phonetic[2][morph] = str(bid)
-        c.execute("""
-            SELECT id, slot, which_lexeme FROM sv_wiktionary 
-            WHERE lemma = 'kapris'
-        """)
-        for wik_id, slot, which_lexeme in c.fetchall():
-            b_id = None
-            for morph in b_ids_by_phonetic[which_lexeme]:
-                if morph_matches_slot(morph, slot):
-                    b_id = b_ids_by_phonetic[which_lexeme][morph]
-                    break
-            c.execute("UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", (b_id, wik_id))
-
-        c.execute("""
-            SELECT id, morph, phonetic FROM braxen 
-            WHERE word IN ('regel', 'regeln')
-        """)
-        b_ids_by_phonetic = {1: {}, 2: {}}
-        for bid, morph, p in c.fetchall():
-            if "'e:" in p:
-                b_ids_by_phonetic[1][morph] = str(bid)
-            else:
-                b_ids_by_phonetic[2][morph] = str(bid)
-        c.execute("""
-            SELECT id, slot, which_lexeme FROM sv_wiktionary 
-            WHERE form IN ('regel', 'regeln')
-        """)
-        for wik_id, slot, which_lexeme in c.fetchall():
-            b_id = None
-            for morph in b_ids_by_phonetic[which_lexeme]:
-                if morph_matches_slot(morph, slot):
-                    b_id = b_ids_by_phonetic[which_lexeme][morph]
-                    break
-            c.execute("UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", (b_id, wik_id))
-        
+        for wik_id, form, which_lexeme in c.fetchall():
+            b_id = b_ids_by_phonetic[form]
+            c.execute(
+                "UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", (b_id, wik_id))
         conn.commit()
-        
+
+        c.execute("""
+            SELECT id, word, phonetic FROM braxen 
+            WHERE lemma = 'hov'
+        """)
+        b_ids_by_phonetic = {1: {}, 2: {}}
+        for bid, word, p in c.fetchall():
+            if "u:" in p:
+                b_ids_by_phonetic[1][word] = str(bid)
+            else:
+                b_ids_by_phonetic[2][word] = str(bid)
+        c.execute("""
+            SELECT id, form, which_lexeme FROM sv_wiktionary 
+            WHERE lemma = 'hov'
+        """)
+        for wik_id, form, which_lexeme in c.fetchall():
+            b_id = None
+            for word in b_ids_by_phonetic[which_lexeme]:
+                if form == word:
+                    b_id = b_ids_by_phonetic[which_lexeme][form]
+                    break
+            c.execute(
+                "UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", (b_id, wik_id))
+        conn.commit()
+
+        c.execute("""
+            SELECT id, word, phonetic FROM braxen 
+            WHERE word IN ('cykel', 'cykeln')
+        """)
+        b_ids_by_phonetic = {0: {}, 1: {}}
+        for bid, word, p in c.fetchall():
+            if 'y:' in p:
+                b_ids_by_phonetic[1][word] = str(bid)
+            else:
+                b_ids_by_phonetic[0][word] = str(bid)
+        c.execute("""
+            SELECT id, form, which_lexeme FROM sv_wiktionary 
+            WHERE form IN ('cykel', 'cykeln')
+        """)
+        for wik_id, form, which_lexeme in c.fetchall():
+            b_id = None
+            for word in b_ids_by_phonetic[which_lexeme]:
+                if form == word:
+                    b_id = b_ids_by_phonetic[which_lexeme][form]
+                    break
+            c.execute(
+                "UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", (b_id, wik_id))
+        conn.commit()
+
+        c.execute("""
+            SELECT id, word, phonetic FROM braxen 
+            WHERE word IN ('marker', 'markerna');
+        """)
+        b_ids_by_phonetic = {0: {}, 1: {}}
+        for bid, word, p in c.fetchall():
+            if ",ex" in p:
+                b_ids_by_phonetic[1][word] = str(bid)
+            else:
+                b_ids_by_phonetic[0][word] = str(bid)
+        c.execute("""
+            SELECT id, form, which_lexeme FROM sv_wiktionary 
+            WHERE form IN ('marker', 'markerna');
+        """)
+        for wik_id, form, which_lexeme in c.fetchall():
+            b_id = None
+            for word in b_ids_by_phonetic[which_lexeme]:
+                if form == word:
+                    b_id = b_ids_by_phonetic[which_lexeme][form]
+                    break
+            c.execute(
+                "UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", (b_id, wik_id))
+        conn.commit()
+
+        c.execute("""
+            UPDATE sv_wiktionary 
+            SET braxen_ids = CAST(b.id AS TEXT)
+            FROM braxen b
+            WHERE sv_wiktionary.form = 'lov' AND sv_wiktionary.which_lexeme = 1
+            AND b.phonetic = 'l ''o: v';
+        """)
+
+        c.execute("""
+            UPDATE sv_wiktionary 
+            SET braxen_ids = CAST(b.id AS TEXT)
+            FROM braxen b
+            WHERE sv_wiktionary.form IN ('lavar', 'lavarna')
+            AND b.word = sv_wiktionary.form;
+        """)
+
+        c.execute("""
+            UPDATE sv_wiktionary 
+            SET braxen_ids = CAST(b.id AS TEXT)
+            FROM braxen b
+            WHERE sv_wiktionary.form = 'synkopen' AND sv_wiktionary.lemma = 'synkop'
+            AND b.phonetic = 's y ng . k ''o: . p ex n';
+        """)
+
+        c.execute("""
+            UPDATE sv_wiktionary 
+            SET braxen_ids = CAST(b.id AS TEXT)
+            FROM braxen b
+            WHERE sv_wiktionary.form = 'byte' AND sv_wiktionary.which_lexeme = 2
+            AND b.phonetic = 'b ''a j';
+        """)
+
+        c.execute("""
+            UPDATE sv_wiktionary 
+            SET braxen_ids = CAST(b.id AS TEXT)
+            FROM braxen b
+            WHERE sv_wiktionary.form = 'raster' and sv_wiktionary.lemma = 'raster'
+            AND b.phonetic = '''a';
+        """)
+
+        # Everything else
+        c.execute("""
+            SELECT id, lemma, slot, pos, form, gender, which_lexeme, braxen_ids FROM sv_wiktionary
+            WHERE braxen_ids LIKE '%,%'
+        """)
+        batch = []
+        for wik_id, wik_lemma, slot, wik_pos, form, gender, which_lexeme, braxen_ids in c.fetchall():
+            ids = braxen_ids.split(",")
+            if wik_lemma in {'kommersialisera', 'shiamuslimsk', 'parser'}:
+                # Just take the first one
+                batch.append((ids[0], wik_id))
+                continue
+            placeholders = ",".join("?" * len(ids))
+            c2.execute(f"""
+                SELECT id, pos, morph, phonetic, syllables, stress FROM braxen
+                WHERE id IN ({placeholders})
+            """, ids)
+            results = c2.fetchall()
+            unique_phonetics = {p for _, _, _, p, _, _ in results}
+            if len(unique_phonetics) == 1 or wik_pos == "name":
+                # Just take the first one
+                batch.append((ids[0], wik_id))
+                continue
+            for b_id, b_pos, morph, phonetic, syllables, stress in results:
+                if any(all(conditions) for conditions in
+                       [
+                           [wik_lemma == "beta", which_lexeme < 4, '"e' in phonetic],
+                           [wik_lemma == "beta", which_lexeme == 4, ",a" in phonetic],
+                           [wik_lemma == "kapris", which_lexeme == 1, "'i:" in phonetic],
+                           [wik_lemma == "kapris", which_lexeme == 2, "'a:" in phonetic],
+                           [wik_lemma == "kis", which_lexeme == 1, "k" in phonetic],
+                           [wik_lemma == "kis", which_lexeme == 2, "c" in phonetic],
+                           [wik_lemma == "köra", which_lexeme == 1, "c" in phonetic],
+                           [wik_lemma == "köra", which_lexeme == 2, "k" in phonetic],
+                           [wik_lemma == "killa", "k" in phonetic],
+                           [wik_lemma == "kola", which_lexeme == 2, "o:" in phonetic],
+                           [wik_lemma == "kola", which_lexeme == 3, "u:" in phonetic],
+                           [wik_lemma == "lova", which_lexeme == 1, "o:" in phonetic],
+                           [wik_lemma == "lova", which_lexeme == 2, "u:" in phonetic],
+                           [wik_lemma == "regel", which_lexeme == 1, "'e:" in phonetic],
+                           [wik_lemma == "regel", which_lexeme == 2, '"e:' in phonetic],
+                           [wik_lemma == "polska", '"o' in phonetic],
+                           [wik_lemma == "lama", '"a:' in phonetic],
+                           [wik_lemma == "stalla", not "o:" in phonetic],
+                           [wik_lemma == "ådra", "-" in phonetic],
+                           [wik_lemma == "vederbörande", "-" in phonetic],
+                           [wik_lemma == "påta", which_lexeme == 1, "-" in phonetic],
+                           [wik_lemma == "ålägga", "-" in phonetic],
+                           [wik_lemma == "hängar", not "-" in phonetic],
+                           [wik_lemma == "påta", which_lexeme == 0, not "-" in phonetic],
+                           [wik_lemma == "åla", not "-" in phonetic],
+                           [wik_lemma == "förbunden", not '"' in phonetic],
+                           [wik_lemma == "förtrycka", not '"' in phonetic],
+                           [wik_lemma == "förslag", which_lexeme == 0, not "-" in phonetic],
+                           [wik_lemma == "förslag", which_lexeme == 1, "-" in phonetic],
+                           [wik_lemma == "åta", ",a:" in phonetic],
+                           [wik_lemma == "förstå", "'o:" in phonetic],
+                           [wik_lemma == "intersektionalitet", "~" in phonetic],
+                           [wik_lemma == "förmyndarskap", "~" in phonetic],
+                           [wik_lemma == "dolme", ",ex" in phonetic],
+                           [wik_lemma == "sinka", "ng" in phonetic],
+                           [wik_lemma == "ståt", '"' not in phonetic],
+                           [wik_lemma == "relativ", "r e . l a" in phonetic],
+                           [wik_lemma == "släkte", ",ex" in phonetic],
+                           [wik_lemma == "isomorfi", "i:" in phonetic],
+                           [wik_lemma == "cytosin", "y ." in phonetic],
+                           [wik_lemma == "väl", "'ä: l" in phonetic],
+                           [wik_lemma == "förut", which_lexeme == 1, '"oe:' in phonetic],
+                           [wik_lemma == "förut", which_lexeme == 2, "'oe:" in phonetic],
+                           [wik_lemma == "ådra", ",a:" in phonetic],
+                           [wik_lemma == "grammatik", "'a" in phonetic],
+                           [wik_lemma == "historik", "'u:" in phonetic],
+                           [wik_lemma == "praktik", "'a" in phonetic],
+                           [wik_lemma == "teknik", "'e" in phonetic],
+                           [wik_lemma == "polemik", "'e:" in phonetic],
+                           [wik_lemma == "logiker", "'o:" in phonetic],
+                           [wik_lemma == "klinik", "'i:" in phonetic],
+                           [wik_lemma == "taktik", "'a" in phonetic],
+                           [wik_lemma == "hemofili", "ä" in phonetic],
+                           [wik_lemma == "länd", "'ä" in phonetic],
+                           [wik_lemma == "fajt", ",ex" in phonetic],
+                           [wik_lemma == "kreativ", "'e:" in phonetic],
+                           [wik_lemma == "passiv", "'a" in phonetic],
+                           [wik_lemma == "matte", '"a' in phonetic],
+                           [wik_lemma == "hänga", "ng" in phonetic],
+                           [wik_lemma == "tänka", "'ä" in phonetic],
+                           [wik_lemma == "boren", '"u:' in phonetic],
+                           [wik_lemma == "mull", "'uu" in phonetic],
+                           [wik_lemma == "ide", ",ex" in phonetic],
+                           [wik_lemma == "jam", "'a " in phonetic],
+                           [wik_lemma == "mjölk", "k ex" in phonetic],
+                           [wik_lemma == "finska", not "-" in phonetic],
+                           [wik_lemma == "finsko", "-" in phonetic],
+                           [wik_lemma == "krater", "'a" in phonetic],
+                           [wik_lemma == "gem", "g" in phonetic],
+                           [wik_lemma == "box", '"o' in phonetic],
+                           [wik_lemma == "men", "'e:" in phonetic],
+                           [wik_lemma == "pop", which_lexeme ==
+                               0, not ":" in phonetic],
+                           [wik_lemma == "pop", which_lexeme == 1, ":" in phonetic],
+                       ]):
+                    batch.append((b_id, wik_id))
+
+        c.executemany("UPDATE sv_wiktionary SET braxen_ids = ? WHERE id = ?", batch)
+        conn.commit()
+
         
 if __name__ == "__main__":
-    # main()
-    # add_phrasal_verbs_to_braxen()
-    # fill_in_missing_braxen_ids()
+    main()
+    add_phrasal_verbs_to_braxen()
+    fill_in_missing_braxen_ids()
     resolve_ambiguous()

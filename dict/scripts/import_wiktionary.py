@@ -52,6 +52,9 @@ INVALID_POS = {
 }
 
 def main():
+    
+    seen = set()
+    
     with sqlite3.connect(DB_PATH) as conn, \
         open(RAW_DIR / "kaikki.org-dictionary-Swedish.jsonl") as f:
 
@@ -78,22 +81,41 @@ def main():
             if pos in INVALID_POS:
                 continue
 
+            if word in {"känna som sin egen ficka", "låtsas som att det regnar"}:
+                continue
+
             gender = None
             senses = data.get("senses", [])
             first_sense = senses[0]
+            if any(" century spelling" in g for g in first_sense.get("glosses", [])):
+                continue
                 
             if all(set(sense.get("tags", [])) & TAGS_TO_EXCLUDE for sense in senses):
                 continue
             first_tags = set(first_sense.get("tags", []))
-            if first_tags & {'form-of', 'misspelling'}:
+            if first_tags & {'form-of', 'misspelling', 'alt-of'}:
                 continue
-            if "common-gender" in first_tags:
+            if {"common-gender", "neuter"} <= first_tags:
+                gender = "e" # either
+            elif "common-gender" in first_tags:
                 gender = "c"
             elif "neuter" in first_tags:
                 gender = "n"
 
-            which_lexeme = data.get("etymology_number", 0)
+            if pos == "noun" and not gender:
+                continue
 
+            which_lexeme = data.get("etymology_number", 0)
+            key = f"{word}|{pos}|{gender or ""}|{str(which_lexeme)}"
+            # Allow multiple lexemes even when not clear from the data (e.g. påta)
+            if key in seen:
+                which_lexeme += 1
+                key = f"{word}|{pos}|{gender or ""}|{str(which_lexeme)}"
+            seen.add(key)
+
+            if word == "hov" and which_lexeme == 3:
+                continue
+            
             table_tags = 0
             for form_data in data.get("forms", []):
                 if table_tags > 1:
@@ -139,9 +161,32 @@ def main():
                     "INSERT INTO sv_wiktionary (lemma, pos, gender, which_lexeme, form, slot) VALUES (?, ?, ?, ?, ?, ?)", batch)
                 batch = []
 
-        if batch:
-            c.executemany(
-                "INSERT INTO sv_wiktionary (lemma, pos, gender, which_lexeme, form, slot) VALUES (?, ?, ?, ?, ?, ?)", batch)
+        # Second sense of förslag; should be a separate lexeme
+        batch.append(('förslag', 'noun', 'n', 1, 'förslag', 'IND_SG'))
+        batch.append(('förslag', 'noun', 'n', 1, 'förslaget', 'DEF_SG'))
+        # Second sense of kanon (KAnon); should be a separate lexeme
+        batch.append(('kanon', 'noun', 'c', 1, 'kanon', 'IND_SG'))
+        batch.append(('kanon', 'noun', 'c', 1, 'kanonen', 'DEF_SG'))
+        batch.append(('kanon', 'noun', 'c', 1, 'kanoner', 'IND_PL'))
+        batch.append(('kanon', 'noun', 'c', 1, 'kanonerna', 'DEF_PL'))
+        # Sixth sense of mark (pl. mArkEr); should be a separate lexeme
+        batch.append(('mark', 'noun', 'c', 1, 'mark', 'IND_SG'))
+        batch.append(('mark', 'noun', 'c', 1, 'marken', 'DEF_SG'))
+        batch.append(('mark', 'noun', 'c', 1, 'marker', 'IND_PL'))
+        batch.append(('mark', 'noun', 'c', 1, 'markerna', 'DEF_PL'))
+        # Second sense of jam (jam session); only in Swedish Wiktionary; should be a separate lexeme
+        batch.append(('jam', 'noun', 'n', 1, 'jam', 'IND_SG'))
+        batch.append(('jam', 'noun', 'n', 1, 'jammet', 'DEF_SG'))
+        batch.append(('jam', 'noun', 'n', 1, 'jam', 'IND_PL'))
+        batch.append(('jam', 'noun', 'n', 1, 'jammena', 'DEF_PL'))
+        # Second sense of cykel; should be a separate lexeme
+        batch.append(('cykel', 'noun', 'c', 1, 'cykel', 'IND_SG'))
+        batch.append(('cykel', 'noun', 'c', 1, 'cykeln', 'DEF_SG'))
+        batch.append(('cykel', 'noun', 'c', 1, 'cyklar', 'IND_PL'))
+        batch.append(('cykel', 'noun', 'c', 1, 'cyklarna', 'DEF_PL'))
+
+        c.executemany(
+            "INSERT INTO sv_wiktionary (lemma, pos, gender, which_lexeme, form, slot) VALUES (?, ?, ?, ?, ?, ?)", batch)
 
         conn.commit()
         c.execute(
