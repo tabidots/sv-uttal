@@ -7,40 +7,11 @@ import { Aside } from '@astrojs/starlight/components';
 import AudioButton from '../../../components/AudioButton.astro';
 import ShowTones from '../../../components/ShowTones.astro';
 
-This analysis is the result of examining approximately 3500 distinct verb lexemes in Wiktionary using pronunciation data from the Braxen dataset. For the sake of simplicity, phrasal verbs were excluded (the rationale is similar to that for excluding compound nouns in the noun analysis.)
-
-## General pattern
-
-In terms of pitch accent, there are essentially only four kinds of verbs, as determined by the pitch accents of the infinitive and the present tense.
-
-| infinitve | present | type |
-| --- | --- | --- |
-| any | monosyllabic | "Hidden" grave accent |
-| grave | acute | Shifting accent | 
-| grave | grave | Stable grave accent |
-| acute | acute | Stable acute accent |
-
-However, when divided by traditional verb group (*-er* verbs, *-ar* verbs and short verbs), some patterns become immediately clear. 
+This analysis is the result of examining approximately 3500 distinct verb lexemes in Wiktionary using pronunciation data from the Braxen dataset and some anomalies cross-checked against Lexin.
 
 ## Unprefixed *-er* verbs
 
-### Stable grave accent (7)
-
-There are only seven unprefixed *-er* verbs that keep the stress on *-er* in the present tense and have a grave accent in all forms having more than one syllable.
-
-| inf. | pres. | past | sup. | pres. part. | past part. |
-| ---| --- | --- | --- | --- | --- |
-| <ShowTones w="br↗ygg↘a" /> | <ShowTones w="br↗ygg↘er" /> | <ShowTones w="br↗yggd↘e" /> | bryggt | - | bryggd |
-| <ShowTones w="mi↗nn↘as" /> | <ShowTones w="mi↗nn↘er" /> | <ShowTones w="mi↗nd↘es" /> | mints | - | - |
-| <ShowTones w="sl↗ink↘a" /> | <ShowTones w="sl↗ink↘er" /> | slank | <ShowTones w="sl↗unk↘it" /> | - | sl↗unken |
-| <ShowTones w="sl↗int↘a" /> | <ShowTones w="sl↗int↘er" /> | slant | <ShowTones w="sl↗unt↘it" /> | - | - |
-| <ShowTones w="str↗id↘a" /> | <ShowTones w="str↗id↘er" /> | stred | <ShowTones w="str↗id↘it" /> | <ShowTones w="str↗id↘ande" /> | - |
-| <ShowTones w="sv↗id↘a" /> | <ShowTones w="sv↗id↘er" /> | sved | <ShowTones w="sv↗id↘it" /> | <ShowTones w="sv↗id↘ande" /> | - |
-| <ShowTones w="v↗inn↘a" /> | <ShowTones w="v↗inn↘er" /> | vann | <ShowTones w="v↗unn↘it" /> | <ShowTones w="v↗inn↘ande" /> | <ShowTones w="v↗unn↘en" /> |
-
-### Shifting accent (281)
-
-All other unprefixed *-er* verbs (verbs with a two-syllable infinitive) shift from grave to acute in the present tense (and any monosyllabic forms).
+The *-er* in the present tense of all unprefixed (two-syllable) *-er* verbs is unstressed. This means that the present tense has an acute accent, while all other two-syllable forms, including the infinitive, have a grave accent.
 
 | inf. | pres. | past | sup. | pres. part. | past part. |
 | --- | --- | --- | --- | --- | --- |
@@ -49,27 +20,9 @@ All other unprefixed *-er* verbs (verbs with a two-syllable infinitive) shift fr
 | <ShowTones w="spr↗ing↘a" /> | **<ShowTones w="spr↗inger" />** | <ShowTones w="sprang" /> | <ShowTones w="spr↗ung↘it" /> | <ShowTones w="spr↗ing↘ande" /> | <ShowTones w="spr↗ung↘en" /> |
 | <ShowTones w="t↗änk↘a" /> | **<ShowTones w="t↗änker" />** | <ShowTones w="t↗änkt↘e" /> | <ShowTones w="tänkt" /> | <ShowTones w="t↗änk↘ande" /> | <ShowTones w="tänkt" /> |
 
-<details>
-  <summary>Complete list</summary>
-  binder, biter, bjuder, bleker, blänger, blänker, blåser, blöder, brinner, brister, bryner, bryter, bräcker, bräker, bränner, bygger, byter, bänder, böjer, dimper, dricker, driver, drämmer, dränker, dräper, dröjer, drömmer, duger, dyker, dämmer, dänger, döljer, dömer, döper, faller, finner, fiser, flyger, flyter, fläker, fnyser, fryser, fryser, frälser, fräser, fräser, fräter, fyller, fäller, fäster, föder, följer, föser, gifter, gitter, gjuter, glider, gläfser, glänser, glöder, glömmer, gnager, gnider, gnäller, griper, grämer, gräver, gråter, gröper, gröper, gäller, gäller, göder, gömmer, heter, hinner, hjälper, hugger, hyser, häller, händer, håller, höjer, jäser, klipper, kliver, klyver, kläcker, klämmer, klänger, klöser, kniper, knycker, knyter, knäcker, knäpper, kommer, krymper, kryper, kränger, kränker, kräver, kröker, kröner, kvider, kväker, kväljer, kväser, kväver, kyler, kysser, känner, leder, lejer, leker, lever, lider, ligger, ljuder, ljuger, lycker, lyder, lyfter, lyser, läcker, läker, läser, låser, låter, löder, löper, löser, mister, myser, mänger, märker, mäter, möter, niger, njuter, nyper, nämner, näpser, nöjer, nöter, piper, plöjer, pryder, pyser, pöser, reder, reser, reser, rider, ringer, rinner, rister, river, rycker, rymmer, ryser, ryter, räcker, ränner, råder, röjer, röker, röner, sitter, sjuder, sjunger, sjunker, skaver, skiljer, skiter, skjuter, skrider, skriker, skriver, skrymmer, skryter, skräder, skräller, skrämmer, skyler, skyller, skymmer, skäller, skälver, skämmer, skänker, skärper, sköljer, skönjer, sköter, slipper, sliter, sluter, slänger, släpper, smeker, smider, smiter, smyger, smäcker, smäller, smälter, smörjer, snyter, snäpper, snärjer, snäser, snöper, snörper, sover, spiller, spinner, spricker, sprider, springer, spräcker, spränger, spänner, steker, sticker, stiger, stinger, stinker, stjälper, stryker, stryper, sträcker, styrker, ställer, stämmer, stänger, stänker, stärker, stöper, stöter, suger, super, sveder, sveper, sviker, svinner, sväljer, sväller, svälter, svänger, säljer, sänder, sänker, sätter, söker, sörjer, söver, tiger, tigger, tjuter, trycker, tryter, tränger, träter, tycker, tyder, tynger, täcker, tämjer, tänder, tänjer, tänker, täpper, töjer, tömmer, viger, viner, vrider, vräker, vränger, väcker, väger, väjer, väljer, väller, välter, välver, vänder, vänjer, värjer, värker, värmer, värper, väser, väter, väver, äger, ärver, äter, åker, öder, öser
-</details>
-
-The remaining *-er* verbs are prefixed and are covered in the section **Verbs that have a stable accent**.
-
 ## Unprefixed *-ar* verbs
 
-### Shifting accent (2)
-
-In contrast to the *-er* verbs, only two *-ar* verbs shift from grave to acute in the present tense:
-
-| inf. | pres. | past | sup. | pres. part. | past part. |
-| --- | --- | --- | --- | --- | --- |
-| <ShowTones w="kr↗ök↘a" /> | <ShowTones w="kr↗ökar" /> | <ShowTones w="kr↗ökade" /> | <ShowTones w="kr↗ökat" /> | <ShowTones w="kr↗ök↘ande" /> | - |
-| <ShowTones w="sch↗akta" /> | <ShowTones w="sch↗aktar" /> | <ShowTones w="sch↗aktade" /> | <ShowTones w="sch↗aktat" /> | - | <ShowTones w="sch↗akt↘ad" /> |
-
-### Stable grave accent (1711)
-
-Basically all other unprefixed *-ar* verbs (verbs with a two-syllable infinitive) fall in this category.
+All unprefixed two-syllable *-ar* verbs have a grave accent in all forms.
 
 | inf. | pres. | past | sup. | pres. part. | past part. |
 | --- | --- | --- | --- | --- | --- |
@@ -78,9 +31,7 @@ Basically all other unprefixed *-ar* verbs (verbs with a two-syllable infinitive
 | <ShowTones w="st↗ann↘a" /> | <ShowTones w="st↗ann↘ar" /> | <ShowTones w="st↗ann↘ade" /> | <ShowTones w="st↗ann↘at" /> | <ShowTones w="st↗ann↘ande" /> | <ShowTones w="st↗ann↘ad" /> |
 | <ShowTones w="t↗itt↘a" /> | <ShowTones w="t↗itt↘ar" /> | <ShowTones w="t↗itt↘ade" /> | <ShowTones w="t↗itt↘at" /> | <ShowTones w="t↗itt↘ande" /> | <ShowTones w="t↗itt↘ad" /> |
 
-### 3-syllable verbs with grave accent (10)
-
-Of the unprefixed *-ar* verbs with a stable grave accent, only 10 have an infinitive with *three syllables*. They are:
+10 unprefixed *-ar* verbs have an infinitive with *three syllables*. They are:
 
 | inf. | pres. | past | sup. | pres. part. | past part. |
 | --- | --- | --- | --- | --- | --- |
@@ -95,11 +46,11 @@ Of the unprefixed *-ar* verbs with a stable grave accent, only 10 have an infini
 | <ShowTones w="w↗allr↘affa" /> | <ShowTones w="w↗allr↘affar" /> | <ShowTones w="w↗allr↘affade" /> | <ShowTones w="w↗allr↘affat" /> | <ShowTones w="w↗allr↘affande" /> | - |
 | <ShowTones w="↗ävent↘yra" /> | <ShowTones w="↗ävent↘yrar" /> | <ShowTones w="↗ävent↘yrade" /> | <ShowTones w="↗ävent↘yrat" /> | - | - |
 
-All other verbs whose infinitive has more than two syllables are prefixed verbs and are covered in the section **Verbs that have a stable accent**.
+## Non *-er/-ar* verbs
 
-## Verbs with a "hidden" grave accent (59)
+### "Hidden" grave accent
 
-All verbs whose present tense is monosyllabic have a *"hidden" grave accent.* This includes the small group of so-called *short verbs* (both regular and irregular). Any inflection that consists of more than one syllable has a grave accent.
+All verbs whose present tense does not end in *-er/-ar* and is monosyllabic have a *"hidden" grave accent.* Any inflection that consists of more than one syllable has a grave accent.
 
 | inf. | pres. | past | sup. | pres. part. | past part. |
 | --- | --- | --- | --- | --- | --- |
@@ -114,9 +65,21 @@ All verbs whose present tense is monosyllabic have a *"hidden" grave accent.* Th
   ber, blir, bor, brer, bryr, bär, bör, drar, dör, flår, får, för, ger, glor, gnor, gnyr, gror, gryr, går, gör, har, hyr, hör, kan, klår, kräks, kör, lär, mår, när, når, pyr, ror, ser, sker, skor, skyr, slår, slåss, snor, snör, spyr, spår, strör, styr, stör, stör, svär, syr, sår, tar, ter, tror, tär, tål, vet, vill, yr, är
 </details>
 
-## Verbs that have a stable accent
+### Stable acute accent
 
-### Verb prefixes and pitch accent
+All verbs whose present tense does not end in *-er/-ar* and has two syllables have a stable acute accent. There are just 20 of these. These verbs all have the prefix *be-* or *för-*, which is consistent with the behavior described in the next section.
+
+| inf. | pres. | past | sup. | pres. part. | past part. |
+| --- | --- | --- | --- | --- | --- |
+| <ShowTones w="ber↗o" /> <AudioButton word="bero" /> | <ShowTones w="ber↗or" /> <AudioButton word="beror" /> | <ShowTones w="ber↗odde" /> <AudioButton word="berodde" /> | <ShowTones w="ber↗ott" /> <AudioButton word="berott" /> | <ShowTones w="ber↗oende" /> <AudioButton word="beroende" /> | - | - |
+| <ShowTones w="först↗å" /> <AudioButton word="förstå" /> | <ShowTones w="först↗år" /> <AudioButton word="förstår" /> | <ShowTones w="först↗od" /> <AudioButton word="förstod" /> | <ShowTones w="först↗ått" /> <AudioButton word="förstått" /> | <ShowTones w="först↗ående" /> <AudioButton word="förstående" /> | <ShowTones w="först↗ådd" /> <AudioButton word="förstådd" /> |
+
+<details>
+  <summary>Complete list</summary>
+  bebo, begära, begå, bero, beröra, beskära, beslå, bestå, förbli, förföra, förgå, förgöra, förhöra, förmå, förslå, försmå, förstå, förstöra, förtro, förtära
+</details>
+
+## Prefixes and pitch accent
 
 Many stable accent verbs have a **prefix**.
 
@@ -145,7 +108,7 @@ This also means that no prefixed verb has a shifting stress pattern.
 | **<ShowTones w="↗in" />**•<ShowTones w="skr↘iva" /> | **<ShowTones w="↗in" />**•<ShowTones w="skr↘iver" /> | **<ShowTones w="↗in" />**•<ShowTones w="skr↘ev" /> | **<ShowTones w="↗in" />**•<ShowTones w="skr↘ivit" /> | **<ShowTones w="↗in" />**•<ShowTones w="skr↘ivande" /> | **<ShowTones w="↗in" />**•<ShowTones w="skr↘iven" /> |
 | **<ShowTones w="t↗ill" />**•<ShowTones w="skr↘iva" /> | **<ShowTones w="t↗ill" />**•<ShowTones w="skr↘iver" /> | **<ShowTones w="t↗ill" />**•<ShowTones w="skr↘ev" /> | **<ShowTones w="t↗ill" />**•<ShowTones w="skr↘ivit" /> | **<ShowTones w="t↗ill" />**•<ShowTones w="skr↘ivande" /> | **<ShowTones w="t↗ill" />**•<ShowTones w="skr↘iven" /> |
 
-Second, as can be seen from the above examples, they also "steal" the stress from theh ending. However, the prefixes *för-* and *be-* remain unstressed. This does not apply to the prefix *före-* and the rare double prefix *för•be-*, which **do** steal the stress.
+Second, as can be seen from the above examples, they also "steal" the stress from the ending. However, the prefixes *för-* and *be-* remain unstressed. This does not apply to the prefix *före-* and the rare double prefix *för•be-*, which **do** steal the stress.
 
 | inf. | pres. | past | sup. | pres. part. | past part. |
 | --- | --- | --- | --- | --- | --- |

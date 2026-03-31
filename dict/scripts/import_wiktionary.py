@@ -115,6 +115,8 @@ def main():
 
             if word == "hov" and which_lexeme == 3:
                 continue
+            if word == "må" and which_lexeme == 1:
+                continue
             
             table_tags = 0
             for form_data in data.get("forms", []):
@@ -129,9 +131,28 @@ def main():
                 except KeyError:
                     continue
 
-                # Wiktionary error
+                # Wiktionary errors
                 if word == "avsäga":
                     form = form.replace("från", "av")
+                if word == "dra en Tarzan":
+                    form = form.replace("dra en Tarzan en Tarzan", "dra en Tarzan")
+                    form = form.replace("dra en Tarzans en Tarzan", "dras en Tarzan")
+                if word == "kaskadspy" and "kaskad" not in form:
+                    form = "kaskad" + form
+                if word == "räkna ned":
+                    form = form.replace("upp", "ned")
+                if word == "framlägga" and " fram" in form:
+                    form = "fram" + form.replace(" fram", "")
+                if word == "huta":
+                    word = "huta åt"
+                if form == "förkylr sig":
+                    form = "förkyler sig"
+                if word == "annalka":
+                    pos = "adj"
+                    word = "annalkande"
+                if form == "bedjande":
+                    pos = "adj"
+                    word = "bedjande"
 
                 if tagset & TAGS_TO_EXCLUDE:
                     if "table-tags" in tagset:
@@ -151,6 +172,10 @@ def main():
                     continue
                 elif slot == "POS_DEF" and not form.endswith(("lilla", "blå", "blåa", "grå", "gråa")):
                     continue
+
+                if word == "forkyla sig" and slot == "INF":
+                    form = "forkyla sig"
+
                 batch.append((word, pos, gender, which_lexeme, form, slot))
             
             if pos not in {"verb", "adj", "noun", "participle"} or not data.get("forms"):

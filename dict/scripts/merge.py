@@ -155,9 +155,12 @@ def add_phrasal_verbs_to_braxen():
             SET braxen_ids = CAST(b.id AS TEXT)
             FROM braxen b
             WHERE b.word = sv_wiktionary.form
-                AND b.pos = 'verb'
-                AND sv_wiktionary.form LIKE '% %'
-                AND sv_wiktionary.pos = 'verb';
+                AND b.pos IN ('verb', 'participle')
+                AND (
+                        (sv_wiktionary.form LIKE '% %' AND sv_wiktionary.pos IN ('verb'))
+                    OR
+                        (sv_wiktionary.lemma LIKE '% %' AND sv_wiktionary.pos IN ('participle'))
+                    );
         """)
         conn.commit()
 

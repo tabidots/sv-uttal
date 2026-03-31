@@ -32,9 +32,9 @@ export default defineConfig({
 					label: 'Shifting accents',
 					items: [
 						{ label: 'Introduction', slug: 'accent' },
-						{ label: 'Nouns', slug: 'accent/nouns' },
 						{ label: 'Verbs', slug: 'accent/verbs' },
 						{ label: 'Adjectives', slug: 'accent/adjectives' },
+						{ label: 'Nouns', slug: 'accent/nouns' },
 					],
 				},
 			],

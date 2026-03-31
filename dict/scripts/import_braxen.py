@@ -43,6 +43,11 @@ PHONETIC_CORRECTIONS = {
     "försiggick": 'f "oe: ~ rs i - j ,i k',
     "beredes": "b eh . r 'e: . d ex s",
     "borna": 'b "u: . rn ,a',
+    "uteblir": '"uu: . t e - b l ,i: r',
+    "veto": "v 'e: . t u",
+    "akvarierna": "a . k v 'a: . r ih . ex . rn a",
+    "akvariet":	"a . k v 'a: . r ih . ex t",
+    "akvarium":	"a . k v 'a: . r ih . uu m"
 }
 
 def main():
@@ -112,8 +117,13 @@ def main():
             if word == "minnes":
                 pos = "verb"
                 morph = "PRS SFO"
+            if word in {"annalkande", "bedjande"}:
+                pos = "adj"
+                morph = "POS UTR/NEU SIN/PLU IND/DEF NOM"
             if "f uu ng . k . x ,u: n" in phonetic:
                 phonetic = phonetic.replace("f uu ng . k . x ,u: n", "f uu n g k . x ,u: n")
+            if word in {"kompani", "kompaniet", "kompanier", "kompanierna"} and "NEU" in morph:
+                phonetic = phonetic.replace("k o m . p a . n 'i:", 'k "o m . p a . n ,i:')
             
             batch.append((word, pos, morph, phonetic))
             if len(batch) == 1000:
@@ -165,6 +175,8 @@ def add_lemmas():
                     lemma = "pop"
                 if word in {"kikärta", "kikärtan", "kikärtor", "kikärtorna"}:
                     lemma = "kikärta"
+                if word in {"bedjande", "annalkande"}:
+                    lemma = word
 
             if not is_base_form and len(lemma) > 1:
                 lemma = [l for l in lemma if l != word]
