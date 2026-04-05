@@ -32,6 +32,19 @@ SLOT_TO_MORPH = {
     'PRT_PART': ('PRF', 'UTR', 'SIN', 'IND', 'NOM'),
 }
 
+IK_NOUNS = {
+    'akustik', 'atomfysik', 'atomteknik', 'bioteknik', 'botanik', 'civilisationskritik', 
+    'diagnostik', 'dogmatik', 'dramatik', 'estetik', 'etik', 'filmkritik', 'fysik', 'genetik', 
+    'genteknik', 'geofysik', 'geopolitik', 'geoteknik', 'grammatik', 'heraldik', 'hermeneutik', 
+    'historik', 'högerpolitik', 'kiropraktik', 'klinik', 'kombinatorik', 'komik', 'konstkritik', 
+    'kriminalteknik', 'kritik', 'kulturkritik', 'kulturpolitik', 'kvantfysik', 'kärnfysik', 'kärnteknik', 
+    'litteraturkritik', 'logik', 'lyrik', 'matematik', 'mekanik', 'metafysik', 'musik', 'musikkritik',
+     'mystik', 'nanoteknik', 'naturmystik', 'nyromantik', 'obstetrik', 'partikelfysik', 'patristik', 
+    'polemik', 'politik', 'praktik', 'pyroteknik', 'realpolitik', 'retorik', 'romantik', 
+    'sjukvårdspolitik', 'statistik', 'ståuppkomik', 'taktik', 'talmystik', 'teknik', 'vänsterpolitik'
+}
+
+IKER_NOUNS = { n + "er" for n in IK_NOUNS }
 
 def morph_matches_slot(morph, slot, gender=None):
     if not slot or slot not in SLOT_TO_MORPH:
