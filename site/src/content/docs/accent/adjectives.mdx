@@ -10,23 +10,30 @@ import ShowTones from '../../../components/ShowTones.astro';
 This analysis is the result of examining approximately 5000 distinct adjective lexemes in Wiktionary using pronunciation data from the Braxen dataset.
 
 <Aside type="note">
-This analysis only covers regular adjectives. Since irregular adjectives have forms that are derived from completely different words, and there are very few such adjectives, there is no real need to cover them here.
+This analysis only covers regular adjectives. Since irregular adjectives have forms that are derived from completely different words (*lite > mindre*) or undergo a stem change (*lång > längre*), and there are very few such adjectives, there is no real need to cover them here.
 </Aside>
 
 ## Monosyllabic adjectives: "Hidden" grave accent
 
-All *regular* adjectives whose dictionary form (common-gender singular) is monosyllabic have a *"hidden" grave accent.* In the plural (as well as comparative and superlative forms), the word takes on a grave accent. There are 277 of these.
+Most *regular* adjectives whose dictionary form (common-gender singular) is monosyllabic have a *"hidden" grave accent.* In the plural (as well as comparative and superlative forms), the word takes on a grave accent. There are 277 of these.
 
 | base | plural | comp. | sup. (def.) |
 | --- | --- | --- | --- |
 | grön | <ShowTones w="gr↗ön↘a" /> | <ShowTones w="gr↗ön↘are" /> | <ShowTones w="gr↗ön↘ast(e)" /> |
 | jämn | <ShowTones w="j↗ämn↘a" /> | <ShowTones w="j↗ämn↘are" /> | <ShowTones w="j↗ämn↘ast(e)" /> |
 
-There is just one exception, and it is not a common word:
+The uncommon word *trilsk* keeps its acute accent in all forms:
 
 | base | plural | comp. | sup. |
 | --- | --- | --- | --- |
 | trilsk | <ShowTones w="tr↗ilska" /> | <ShowTones w="tr↗ilskare" /> | <ShowTones w="tr↗ilskast(e)" /> |
+
+There are two more regular monosyllabic adjectives that have a "hidden" grave accent **except** in the comparative and superlative. The remaining handful of such adjectives all have some sort of stem change (*stor > stõrre*).
+
+| base | plural | comp. | sup. (def.) |
+| --- | --- | --- | --- |
+| grov | <ShowTones w="gr↗ov↘a" /> | <ShowTones w="gr↗övre" /> | <ShowTones w="gr↗övst(e)" /> |
+| hög | <ShowTones w="h↗ög↘a" /> | <ShowTones w="h↗ögre" /> | <ShowTones w="h↗ögst(e)" /> |
 
 <details>
   <summary>Complete list (277)</summary>
